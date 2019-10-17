@@ -1,0 +1,27 @@
+Pin Assignments
+===============
+
+Purpose Pin	GPIO	Peripheral	SEL
+
+TLC5948A
+--------
+DATA	16	P1.2	UCB0SIMO	01
+GSCLK	15	P1.3	MCLK		10
+SCLK	1	P1.1	UCB0CLK		01
+LAT		2	P1.0	P1.0		00 DIR=1
+
+Rotaconnect
+-----------
+RX 		7	P2.1	UCA0RXD		01
+TX 		8	P2.0	UCA0TXD		01
+OHAI 	12	P1.5	P1.5		00 DIR=0 w/ pull-up
+
+Captouch
+--------
+		10	P1.7				00 DIR=0
+		11	P1.6				00 DIR=0
+		13	P1.4				00 DIR=0
+		
+Unused
+------
+		9	P2.2	P2.2		00 DIR=0
