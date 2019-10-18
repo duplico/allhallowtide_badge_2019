@@ -14,14 +14,14 @@ Rotaconnect
 -----------
 RX 		7	P2.1	UCA0RXD		01
 TX 		8	P2.0	UCA0TXD		01
-OHAI 	12	P1.5	P1.5		00 DIR=0 w/ pull-up
+OHAI	9	P2.2	P2.2		00 DIR=0 w/ pull-up
 
 Captouch
 --------
-		10	P1.7				00 DIR=0
-		11	P1.6				00 DIR=0
-		13	P1.4				00 DIR=0
+BOOP	10	P1.7	CAP0.3		00 DIR=0
+EYE 	12	P1.5	CAP0.1		00 DIR=0
 		
 Unused
 ------
-		9	P2.2	P2.2		00 DIR=0
+		11	P1.6				00 DIR=0
+		13	P1.4				00 DIR=0
