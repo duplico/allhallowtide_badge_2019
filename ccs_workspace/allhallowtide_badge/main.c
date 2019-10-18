@@ -26,7 +26,7 @@ void init_clocks() {
     //  Let's bring this up to 8 MHz or so.
 
     __bis_SR_register(SCG0);                // disable FLL
-    CSCTL3 |= SELREF__XT1CLK;               // Set XT1CLK as FLL reference source // TODO: not this
+    CSCTL3 |= SELREF__REFOCLK;              // Set REFO as FLL reference source
     CSCTL0 = 0;                             // clear DCO and MOD registers
     CSCTL1 &= ~(DCORSEL_7);                 // Clear DCO frequency select bits first
     CSCTL1 |= DCORSEL_3;                    // Set DCO = 8MHz
@@ -106,12 +106,16 @@ void generate_config() {
 
 int main(void) {
 
-    WDT_A_hold(WDT_A_BASE);
-    // TODO: GIE
+    WDTCTL = WDTPW | WDTHOLD;
+
     init_clocks();
     init_io();
 
     tlc_init();
 
-    return (0);
+    __bis_SR_register(GIE);
+
+    while (1) {
+
+    }
 }
