@@ -22,6 +22,6 @@ void tlc_set_gs();
 void tlc_set_fun();
 void tlc_stage_blank(uint8_t);
 
-extern uint16_t tlc_gs[16] = {0, };
+extern uint16_t tlc_gs[16];
 
 #endif /* TLC5948A_H_ */
