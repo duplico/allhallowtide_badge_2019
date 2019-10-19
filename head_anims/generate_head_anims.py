@@ -19,7 +19,7 @@ color_corrections = {
     "dim" : (0, 0, 15),
 }
 
-INK_LEN = 6000
+BOOP_LEN = 6000
 
 global_color_correct = (1,.5,1)
 
@@ -28,10 +28,10 @@ eye_frames_uint32 = dict()
 
 c_lines = []
 h_lines = [
-    "#ifndef LEGANIMS_H_",
-    "#define LEGANIMS_H_",
+    "#ifndef BANDANIMS_H_",
+    "#define BANDANIMS_H_",
     "",
-    '#include "../../led_display.h"',
+    '#include "leds.h"',
     "",
     "#define LEG_CAMO_INDEX 0",
     "#define LEG_INK_INDEX 1",
@@ -42,8 +42,8 @@ h_lines = [
 ]
 
 def main():    
-    c_lines.append('#include "../../led_display.h"')
-    c_lines.append('#include "leg_anims.h"')
+    c_lines.append('#include "leds.h"')
+    c_lines.append('#include "band_anims.h"')
     
     all_animations = []
     meta_animations = []
@@ -53,13 +53,7 @@ def main():
     
     for anim in os.listdir("."):
         if not anim[-3:] == "txt": continue
-        print anim
-        camos = []
-        camo_lengths = []
-        inks = []
-        ink_lengths = []
-        super_inks = []
-        super_ink_lengths = []
+        print(anim)
         color_lookups = dict()
         
         
@@ -127,8 +121,8 @@ def main():
             
             if camo_line[-1] == ',':
                 camo_line = camo_line[:-1]
-            camo = map(lambda s: int(s.strip()), camo_line.split(','))
-            camo_frames = [camo[i:i+10] for i in xrange(0, len(camo), 10)]
+            camo = list(map(lambda s: int(s.strip()), camo_line.split(',')))
+            camo_frames = [camo[i:i+10] for i in range(0, len(camo), 10)]
             
             assert "SINGLE" in lines[line_no].upper() or "INK" in lines[line_no].upper()
             line_no += 1
@@ -150,8 +144,8 @@ def main():
                 ink_line += lines[line_no]
                 line_no += 1            
             
-            ink = map(lambda s: int(s.strip()), ink_line.split(','))
-            ink_frames = [ink[i:i+10] for i in xrange(0, len(ink), 10)]
+            ink = list(map(lambda s: int(s.strip()), ink_line.split(',')))
+            ink_frames = [ink[i:i+10] for i in range(0, len(ink), 10)]
             
             assert "DOUBLE" in lines[line_no].upper()
             line_no += 1
@@ -173,27 +167,27 @@ def main():
                 doubleink_line += lines[line_no]
                 line_no += 1            
             
-            doubleink = map(lambda s: int(s.strip()), doubleink_line.split(','))
-            doubleink_frames = [doubleink[i:i+10] for i in xrange(0, len(doubleink), 10)]
+            doubleink = list(map(lambda s: int(s.strip()), doubleink_line.split(',')))
+            doubleink_frames = [doubleink[i:i+10] for i in range(0, len(doubleink), 10)]
             
             # Great. Now we've ingested the entire file.
             # Time to start generating frames.
             
             local_animation_names = []
             
-            for l, lname, atype, wiggle in ((camo_frames, 'camo', anim_types[0], wiggles[0]), (ink_frames, 'ink', anim_types[1], wiggles[1]), (doubleink_frames, 'doubleink', anim_types[2], wiggles[2])):
-                if anim_name.startswith("zflag") and lname == 'ink': break
+            for l, lname, atype, wiggle in ((camo_frames, 'camo', anim_types[0], wiggles[0]), (ink_frames, 'boop', anim_types[1], wiggles[1]), (doubleink_frames, 'bigboop', anim_types[2], wiggles[2])):
+                if anim_name.startswith("zflag") and lname == 'boop': break
                 c_lines.append("// frames for %s" % lname)
-                c_lines.append("const rgbcolor_t %s_%s_frames[][8] = {" % (anim_name, lname))
+                c_lines.append("const rgbcolor_t %s_%s_frames[][4] = {" % (anim_name, lname))
                 h_lines.append("// frames for %s" % lname)
-                h_lines.append("extern const rgbcolor_t %s_%s_frames[][8];" % (anim_name, lname))
+                h_lines.append("extern const rgbcolor_t %s_%s_frames[][4];" % (anim_name, lname))
                 
+                # Flags are all the same.
                 if anim_name.startswith("zflag"):
                     local_animation_names += ["%s_%s" % (anim_name, lname)]*3
                 else:
                     local_animation_names += ["%s_%s" % (anim_name, lname)]
                 
-                frames = []
                 metadata1 = []
                 metadata2 = []
                 total_duration = 0
@@ -202,17 +196,17 @@ def main():
                     metadata2 += [str(f[9])]
                     total_duration += int(f[8]) + int(f[9])
                     try:
-                        fr = map(lambda a: local_colors[a], f[:8])
-                    except Exception as e:
-                        print 'Error on frame: ', f
+                        fr = list(map(lambda a: local_colors[a], f[:4]))
+                    except:
+                        print('Error on frame: ', f)
                         exit(1)
                     fr = fr[::-1]
-                    c_lines.append("    {%s}," % ', '.join(map(lambda rgb: "{0x%x, 0x%x, 0x%x}" % rgb, fr)))
+                    c_lines.append("    {%s}," % ', '.join(map(lambda rgb: "{0x%x, 0x%x, 0x%x}" % tuple(map(int, rgb)), fr)))
                 
-                if total_duration > INK_LEN:
-                    ink_loops = 0
+                if total_duration > BOOP_LEN:
+                    boop_loops = 0
                 else:
-                    ink_loops = INK_LEN / total_duration
+                    boop_loops = BOOP_LEN / total_duration
                 
                 c_lines.append("};")
                 c_lines.append("uint16_t %s_%s_durations[] = {%s};" % (anim_name, lname, ', '.join(metadata1)))
@@ -222,33 +216,33 @@ def main():
                 h_lines.append("extern uint16_t %s_%s_fade_durs[];" % (anim_name, lname))
                 
                 c_lines.append("// the animation:")
-                c_lines.append("const tentacle_animation_t %s_%s = {%s_%s_frames, %s_%s_durations, %s_%s_fade_durs, %d, ANIM_TYPE_%s, %d, %d};" % (anim_name, lname, anim_name, lname, anim_name, lname, anim_name, lname, len(l), atype.upper(), wiggle, ink_loops))
+                c_lines.append("const band_animation_t %s_%s = {%s_%s_frames, %s_%s_durations, %s_%s_fade_durs, %d, ANIM_TYPE_%s, %d, %d};" % (anim_name, lname, anim_name, lname, anim_name, lname, anim_name, lname, len(l), atype.upper(), wiggle, boop_loops))
                 
-                h_lines.append("extern const tentacle_animation_t %s_%s;" % (anim_name, lname))
+                h_lines.append("extern const band_animation_t %s_%s;" % (anim_name, lname))
             c_lines.append("")
-            h_lines.append("extern const tentacle_animation_t *%s_anim_set[3];" % anim_name)
-            c_lines.append("const tentacle_animation_t *%s_anim_set[3] = {%s};" % (anim_name, ', '.join(map(lambda a: "&%s" % a, local_animation_names))))
+            h_lines.append("extern const band_animation_t *%s_anim_set[3];" % anim_name)
+            c_lines.append("const band_animation_t *%s_anim_set[3] = {%s};" % (anim_name, ', '.join(map(lambda a: "&%s" % a, local_animation_names))))
     c_lines.append("")
-    h_lines.append("#define LEG_ANIM_COUNT %d" % len(all_animations))
-    h_lines.append("#define LEG_ANIM_COUNT_INCL_META %d" % len(all_animations+meta_animations))
+    h_lines.append("#define HEAD_ANIM_COUNT %d" % len(all_animations))
+    h_lines.append("#define HEAD_ANIM_COUNT_INCL_META %d" % len(all_animations+meta_animations))
     for i in range(len(all_animations+meta_animations)):
-        h_lines.append("#define LEG_ANIM_%s %d" % ((all_animations+meta_animations)[i].upper(), i))
+        h_lines.append("#define HEAD_ANIM_%s %d" % ((all_animations+meta_animations)[i].upper(), i))
     for i in range(len(all_types)):
         h_lines.append("#define ANIM_TYPE_%s %d" % (all_types[i].upper(), i))
     h_lines.append("#define LEG_ANIM_TYPE_COUNT %d" % len(all_types))
-    c_lines.append("const tentacle_animation_t **legs_all_anim_sets[] = {%s};" % ', '.join(map(lambda a: "%s_anim_set" % a, all_animations+meta_animations)))
-    h_lines.append("extern const tentacle_animation_t **legs_all_anim_sets[];")
+    c_lines.append("const band_animation_t **legs_all_anim_sets[] = {%s};" % ', '.join(map(lambda a: "%s_anim_set" % a, all_animations+meta_animations)))
+    h_lines.append("extern const band_animation_t **legs_all_anim_sets[];")
     
     h_lines.append("#endif // _H_")
     
     all_spray_colors += meta_spray_colors
     h_lines.append("extern const rgbcolor_t sprays[];")
-    c_lines.append("const rgbcolor_t sprays[%d] = {%s};" % (len(all_animations+meta_animations),', '.join(map(lambda rgb: "{0x%x, 0x%x, 0x%x}" % rgb, all_spray_colors))))
+    c_lines.append("const rgbcolor_t sprays[%d] = {%s};" % (len(all_animations+meta_animations),', '.join(map(lambda rgb: "{0x%x, 0x%x, 0x%x}" % tuple(map(int, rgb)), all_spray_colors))))
         
-    with open("leg_anims.c", 'w') as f:
+    with open("band_anims.c", 'w') as f:
         f.writelines(map(lambda a: a+"\n", c_lines))
     
-    with open("leg_anims.h", 'w') as f:
+    with open("band_anims.h", 'w') as f:
         f.writelines(map(lambda a: a+"\n", h_lines))
             
     
