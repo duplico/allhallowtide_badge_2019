@@ -22,4 +22,13 @@ typedef struct {
     int_fast32_t blue;
 } rgbdelta_t;
 
+typedef struct {
+    const rgbcolor_t (*colors)[4];
+    const uint16_t *durations;
+    const uint16_t *fade_durs;
+    uint8_t len;
+    uint8_t anim_type;
+    uint8_t boop_loops;
+} band_animation_t;
+
 #endif /* LEDS_H_ */
