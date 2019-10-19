@@ -28,6 +28,7 @@ typedef struct {
     const uint16_t *fade_durs;
     uint8_t len;
     uint8_t anim_type;
+    uint8_t wiggle;
     uint8_t boop_loops;
 } band_animation_t;
 
