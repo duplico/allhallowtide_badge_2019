@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,8 +59,7 @@ extern "C"
 //! \brief Used in the EComp_init() function as the param parameter.
 //
 //*****************************************************************************
-typedef struct EComp_initParam
-{
+typedef struct EComp_initParam {
     //! Selects the input to the positive terminal
     //! \n Valid values are:
     //! - \b ECOMP_INPUT_0
@@ -105,8 +104,7 @@ typedef struct EComp_initParam
 //! \brief Used in the EComp_configureDAC() function as the param parameter.
 //
 //*****************************************************************************
-typedef struct EComp_configureDACParam
-{
+typedef struct EComp_configureDACParam {
     //! Selects the built-in DAC reference voltage.
     //! \n Valid values are:
     //! - \b ECOMP_DAC_REFERENCE_VOLTAGE_VDD [Default]
@@ -124,6 +122,8 @@ typedef struct EComp_configureDACParam
     //! DAC buffer is 0x1.
     uint16_t secondBufferData;
 } EComp_configureDACParam;
+
+
 
 //*****************************************************************************
 //
@@ -147,14 +147,10 @@ typedef struct EComp_configureDACParam
 //
 //*****************************************************************************
 #define ECOMP_FILTER_DELAY_OFF                                              0x0
-#define ECOMP_FILTER_DELAY_450NS                             (CPFLT | \
-                                                              CPFLTDLY_0)
-#define ECOMP_FILTER_DELAY_900NS                             (CPFLT | \
-                                                              CPFLTDLY_1)
-#define ECOMP_FILTER_DELAY_1800NS                            (CPFLT | \
-                                                              CPFLTDLY_2)
-#define ECOMP_FILTER_DELAY_3600NS                            (CPFLT | \
-                                                              CPFLTDLY_3)
+#define ECOMP_FILTER_DELAY_450NS                             (CPFLT|CPFLTDLY_0)
+#define ECOMP_FILTER_DELAY_900NS                             (CPFLT|CPFLTDLY_1)
+#define ECOMP_FILTER_DELAY_1800NS                            (CPFLT|CPFLTDLY_2)
+#define ECOMP_FILTER_DELAY_3600NS                            (CPFLT|CPFLTDLY_3)
 
 //*****************************************************************************
 //
@@ -240,8 +236,7 @@ typedef struct EComp_configureDACParam
 //*****************************************************************************
 #define ECOMP_DAC_BUFFER_SOURCE_COMP_OUTPUT                                 0x0
 #define ECOMP_DAC_BUFFER_SOURCE_DUAL_BUFFER_1                       (CPDACBUFS)
-#define ECOMP_DAC_BUFFER_SOURCE_DUAL_BUFFER_2               (CPDACBUFS | \
-                                                             CPDACSW)
+#define ECOMP_DAC_BUFFER_SOURCE_DUAL_BUFFER_2               (CPDACBUFS|CPDACSW)
 
 //*****************************************************************************
 //
@@ -417,8 +412,8 @@ extern void EComp_clearInterrupt(uint16_t baseAddress,
 //!           inverted polarity
 //!
 //! \return Logical OR of any of the following:
-//!         - \b EComp_OUTPUT_INTERRUPT_FLAG Output interrupt flag
-//!         - \b EComp_INVERTED_POLARITY_INTERRUPT_FLAG Output interrupt flag
+//!         - \b ECOMP_OUTPUT_INTERRUPT_FLAG Output interrupt flag
+//!         - \b ECOMP_INVERTED_POLARITY_INTERRUPT_FLAG Output interrupt flag
 //!         inverted polarity
 //!         \n indicating the status of the masked flags
 //
@@ -482,8 +477,8 @@ extern void EComp_toggleInterruptEdgeDirection(uint16_t baseAddress);
 //!
 //! \return indicating the output value of the EComp module
 //!         Return one of the following:
-//!         - \b EComp_LOW
-//!         - \b EComp_HIGH
+//!         - \b ECOMP_LOW
+//!         - \b ECOMP_HIGH
 //!         \n indicating the output value of the EComp module
 //
 //*****************************************************************************

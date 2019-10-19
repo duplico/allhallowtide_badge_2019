@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,8 +69,7 @@ extern "C"
 //! parameter.
 //
 //*****************************************************************************
-typedef struct Timer_A_initContinuousModeParam
-{
+typedef struct Timer_A_initContinuousModeParam {
     //! Selects Clock source.
     //! \n Valid values are:
     //! - \b TIMER_A_CLOCKSOURCE_EXTERNAL_TXCLK [Default]
@@ -122,8 +121,7 @@ typedef struct Timer_A_initContinuousModeParam
 //! parameter.
 //
 //*****************************************************************************
-typedef struct Timer_A_initCaptureModeParam
-{
+typedef struct Timer_A_initCaptureModeParam {
     //! Selects the Capture register being used. Refer to datasheet to ensure
     //! the device has the capture compare register being used.
     //! \n Valid values are:
@@ -174,8 +172,7 @@ typedef struct Timer_A_initCaptureModeParam
 //! parameter.
 //
 //*****************************************************************************
-typedef struct Timer_A_initUpDownModeParam
-{
+typedef struct Timer_A_initUpDownModeParam {
     //! Selects Clock source.
     //! \n Valid values are:
     //! - \b TIMER_A_CLOCKSOURCE_EXTERNAL_TXCLK [Default]
@@ -233,8 +230,7 @@ typedef struct Timer_A_initUpDownModeParam
 //! \brief Used in the Timer_A_outputPWM() function as the param parameter.
 //
 //*****************************************************************************
-typedef struct Timer_A_outputPWMParam
-{
+typedef struct Timer_A_outputPWMParam {
     //! Selects Clock source.
     //! \n Valid values are:
     //! - \b TIMER_A_CLOCKSOURCE_EXTERNAL_TXCLK [Default]
@@ -294,8 +290,7 @@ typedef struct Timer_A_outputPWMParam
 //! \brief Used in the Timer_A_initUpMode() function as the param parameter.
 //
 //*****************************************************************************
-typedef struct Timer_A_initUpModeParam
-{
+typedef struct Timer_A_initUpModeParam {
     //! Selects Clock source.
     //! \n Valid values are:
     //! - \b TIMER_A_CLOCKSOURCE_EXTERNAL_TXCLK [Default]
@@ -355,8 +350,7 @@ typedef struct Timer_A_initUpModeParam
 //! parameter.
 //
 //*****************************************************************************
-typedef struct Timer_A_initCompareModeParam
-{
+typedef struct Timer_A_initCompareModeParam {
     //! Selects the Capture register being used. Refer to datasheet to ensure
     //! the device has the capture compare register being used.
     //! \n Valid values are:
@@ -383,6 +377,7 @@ typedef struct Timer_A_initCompareModeParam
     //! Is the count to be compared with in compare mode
     uint16_t compareValue;
 } Timer_A_initCompareModeParam;
+
 
 //*****************************************************************************
 //
@@ -731,8 +726,8 @@ extern void Timer_A_disableInterrupt(uint16_t baseAddress);
 //! \param baseAddress is the base address of the TIMER_A module.
 //!
 //! \return One of the following:
-//!         - \b Timer_A_INTERRUPT_NOT_PENDING
-//!         - \b Timer_A_INTERRUPT_PENDING
+//!         - \b TIMER_A_INTERRUPT_NOT_PENDING
+//!         - \b TIMER_A_INTERRUPT_PENDING
 //!         \n indicating the Timer_A interrupt status
 //
 //*****************************************************************************
@@ -794,8 +789,8 @@ extern void Timer_A_disableCaptureCompareInterrupt(uint16_t baseAddress,
 //!        - \b TIMER_A_CAPTURECOMPARE_INTERRUPT_FLAG
 //!
 //! \return Logical OR of any of the following:
-//!         - \b Timer_A_CAPTURE_OVERFLOW
-//!         - \b Timer_A_CAPTURECOMPARE_INTERRUPT_FLAG
+//!         - \b TIMER_A_CAPTURE_OVERFLOW
+//!         - \b TIMER_A_CAPTURECOMPARE_INTERRUPT_FLAG
 //!         \n indicating the status of the masked interrupts
 //
 //*****************************************************************************
@@ -832,8 +827,8 @@ extern void Timer_A_clear(uint16_t baseAddress);
 //!        - \b TIMER_A_READ_CAPTURE_COMPARE_INPUT
 //!
 //! \return One of the following:
-//!         - \b Timer_A_CAPTURECOMPARE_INPUT_HIGH
-//!         - \b Timer_A_CAPTURECOMPARE_INPUT_LOW
+//!         - \b TIMER_A_CAPTURECOMPARE_INPUT_HIGH
+//!         - \b TIMER_A_CAPTURECOMPARE_INPUT_LOW
 //
 //*****************************************************************************
 extern uint8_t Timer_A_getSynchronizedCaptureCompareInput(uint16_t baseAddress,
@@ -852,8 +847,8 @@ extern uint8_t Timer_A_getSynchronizedCaptureCompareInput(uint16_t baseAddress,
 //!        - \b TIMER_A_CAPTURECOMPARE_REGISTER_2
 //!
 //! \return One of the following:
-//!         - \b Timer_A_OUTPUTMODE_OUTBITVALUE_HIGH
-//!         - \b Timer_A_OUTPUTMODE_OUTBITVALUE_LOW
+//!         - \b TIMER_A_OUTPUTMODE_OUTBITVALUE_HIGH
+//!         - \b TIMER_A_OUTPUTMODE_OUTBITVALUE_LOW
 //
 //*****************************************************************************
 extern uint8_t Timer_A_getOutputForOutputModeOutBitValue(uint16_t baseAddress,

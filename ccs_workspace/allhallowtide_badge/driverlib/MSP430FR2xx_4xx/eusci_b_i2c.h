@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,8 +60,7 @@ extern "C"
 //! parameter.
 //
 //*****************************************************************************
-typedef struct EUSCI_B_I2C_initMasterParam
-{
+typedef struct EUSCI_B_I2C_initMasterParam {
     //! Selects the clocksource. Refer to device specific datasheet for
     //! available options.
     //! \n Valid values are:
@@ -93,8 +92,7 @@ typedef struct EUSCI_B_I2C_initMasterParam
 //! \brief Used in the EUSCI_B_I2C_initSlave() function as the param parameter.
 //
 //*****************************************************************************
-typedef struct EUSCI_B_I2C_initSlaveParam
-{
+typedef struct EUSCI_B_I2C_initSlaveParam {
     //! 7-bit slave address
     uint8_t slaveAddress;
     //! Own address Offset referred to- 'x' value of UCBxI2COAx.
@@ -110,6 +108,7 @@ typedef struct EUSCI_B_I2C_initSlaveParam
     //! - \b EUSCI_B_I2C_OWN_ADDRESS_ENABLE
     uint32_t slaveOwnAddressEnable;
 } EUSCI_B_I2C_initSlaveParam;
+
 
 //*****************************************************************************
 //
@@ -169,7 +168,7 @@ typedef struct EUSCI_B_I2C_initSlaveParam
 //
 //*****************************************************************************
 #define EUSCI_B_I2C_TRANSMIT_MODE                                          UCTR
-#define EUSCI_B_I2C_RECEIVE_MODE                                           0x00
+#define EUSCI_B_I2C_RECEIVE_MODE                                         0x0000
 
 //*****************************************************************************
 //
@@ -228,8 +227,19 @@ typedef struct EUSCI_B_I2C_initSlaveParam
 // functions: EUSCI_B_I2C_remapPins().
 //
 //*****************************************************************************
-#define EUSCI_B_I2C_REMAP_PINS_1                                           0x00
-#define EUSCI_B_I2C_REMAP_PINS_2                                           0x01
+#define EUSCI_B_I2C_REMAP_PINS_FALSE                                   (0x0000)
+#define EUSCI_B_I2C_REMAP_PINS_TRUE                                    (0x0001)
+
+//*****************************************************************************
+//
+// The following are values that can be passed to the timeout parameter for
+// functions: EUSCI_B_I2C_setTimeout().
+//
+//*****************************************************************************
+#define EUSCI_B_I2C_TIMEOUT_DISABLE                                    UCCLTO_0
+#define EUSCI_B_I2C_TIMEOUT_28_MS                                      UCCLTO_1
+#define EUSCI_B_I2C_TIMEOUT_31_MS                                      UCCLTO_2
+#define EUSCI_B_I2C_TIMEOUT_34_MS                                      UCCLTO_3
 
 //*****************************************************************************
 //
@@ -325,9 +335,9 @@ extern void EUSCI_B_I2C_setSlaveAddress(uint16_t baseAddress,
 //
 //! \brief Sets the mode of the I2C device
 //!
-//! When the receive parameter is set to EUSCI_B_I2C_TRANSMIT_MODE, the address
-//! will indicate that the I2C module is in receive mode; otherwise, the I2C
-//! module is in send mode.
+//! When the mode parameter is set to EUSCI_B_I2C_TRANSMIT_MODE, the address
+//! will indicate that the I2C module is in send mode; otherwise, the I2C
+//! module is in receive mode.
 //!
 //! \param baseAddress is the base address of the USCI I2C module.
 //! \param mode Mode for the EUSCI_B_I2C module
@@ -341,7 +351,7 @@ extern void EUSCI_B_I2C_setSlaveAddress(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void EUSCI_B_I2C_setMode(uint16_t baseAddress,
-                                uint8_t mode);
+                                uint16_t mode);
 
 //*****************************************************************************
 //
@@ -709,10 +719,9 @@ extern void EUSCI_B_I2C_masterSendMultiByteStart(uint16_t baseAddress,
 //! \return STATUS_SUCCESS or STATUS_FAILURE of the transmission process.
 //
 //*****************************************************************************
-extern bool EUSCI_B_I2C_masterSendMultiByteStartWithTimeout(
-    uint16_t baseAddress,
-    uint8_t txData,
-    uint32_t timeout);
+extern bool EUSCI_B_I2C_masterSendMultiByteStartWithTimeout(uint16_t baseAddress,
+                                                            uint8_t txData,
+                                                            uint32_t timeout);
 
 //*****************************************************************************
 //
@@ -792,10 +801,9 @@ extern void EUSCI_B_I2C_masterSendMultiByteFinish(uint16_t baseAddress,
 //! \return STATUS_SUCCESS or STATUS_FAILURE of the transmission process.
 //
 //*****************************************************************************
-extern bool EUSCI_B_I2C_masterSendMultiByteFinishWithTimeout(
-    uint16_t baseAddress,
-    uint8_t txData,
-    uint32_t timeout);
+extern bool EUSCI_B_I2C_masterSendMultiByteFinishWithTimeout(uint16_t baseAddress,
+                                                             uint8_t txData,
+                                                             uint32_t timeout);
 
 //*****************************************************************************
 //
@@ -915,10 +923,9 @@ extern uint8_t EUSCI_B_I2C_masterReceiveMultiByteFinish(uint16_t baseAddress);
 //! \return STATUS_SUCCESS or STATUS_FAILURE of the reception process
 //
 //*****************************************************************************
-extern bool EUSCI_B_I2C_masterReceiveMultiByteFinishWithTimeout(
-    uint16_t baseAddress,
-    uint8_t *txData,
-    uint32_t timeout);
+extern bool EUSCI_B_I2C_masterReceiveMultiByteFinishWithTimeout(uint16_t baseAddress,
+                                                                uint8_t *txData,
+                                                                uint32_t timeout);
 
 //*****************************************************************************
 //
@@ -1017,20 +1024,59 @@ extern uint32_t EUSCI_B_I2C_getTransmitBufferAddress(uint16_t baseAddress);
 //! Remaps eUSCI_B GPIO pins. After calling this function,
 //! GPIO_setAsPeripheralModuleFunctionInputPin() or
 //! GPIO_setAsPeripheralModuleFunctionInputPin() still needs to be invoked to
-//! set peripheral functions.
+//! set peripheral functions. Caution: this will also remap eusci_b_spi GPIO
+//! pins.
 //!
 //! \param baseAddress is the base address of the I2C module.
 //! \param pinsSelect remapping pins to select. Please refer to device specific
 //!        datasheet for remapping pins details.
 //!        Valid values are:
-//!        - \b EUSCI_B_I2C_REMAP_PINS_1 [Default]
-//!        - \b EUSCI_B_I2C_REMAP_PINS_2
+//!        - \b EUSCI_B_I2C_REMAP_PINS_FALSE [Default]
+//!        - \b EUSCI_B_I2C_REMAP_PINS_TRUE
 //!
 //! \return None
 //
 //*****************************************************************************
 extern void EUSCI_B_I2C_remapPins(uint16_t baseAddress,
                                   uint8_t pinsSelect);
+
+//*****************************************************************************
+//
+//! \brief Enforces a timeout if the I2C clock is held low longer than a
+//! defined time.
+//!
+//! By using this function, the UCCLTOIFG interrupt will trigger if the clock
+//! is held low longer than this defined time. It is possible to detect the
+//! situation, when a clock is stretched by a master or slave for too long. The
+//! user can then handle this issue by, for example, resetting the eUSCI_B
+//! module. It is possible to select one of three predefined times for the
+//! clock low timeout.
+//!
+//! \param baseAddress is the base address of the I2C module.
+//! \param timeout how long the clock can be low before a timeout triggers.
+//!        Enables generation of the UCCLTOIFG interrupt.
+//!        Valid values are:
+//!        - \b EUSCI_B_I2C_TIMEOUT_DISABLE [Default]
+//!        - \b EUSCI_B_I2C_TIMEOUT_28_MS
+//!        - \b EUSCI_B_I2C_TIMEOUT_31_MS
+//!        - \b EUSCI_B_I2C_TIMEOUT_34_MS
+//!
+//! Modified bits are \b UCCLTO of \b UCBxCTLW1 register; bits \b UCSWRST of \b
+//! UCBxCTLW0 register.
+//!
+//! \return None
+//
+//*****************************************************************************
+extern void EUSCI_B_I2C_setTimeout(uint16_t baseAddress,
+                                   uint16_t timeout);
+
+//*****************************************************************************
+//
+// The following are deprecated #defines.
+//
+//*****************************************************************************
+#define EUSCI_B_I2C_REMAP_PINS_1                   EUSCI_B_I2C_REMAP_PINS_FALSE
+#define EUSCI_B_I2C_REMAP_PINS_2                    EUSCI_B_I2C_REMAP_PINS_TRUE
 
 //*****************************************************************************
 //

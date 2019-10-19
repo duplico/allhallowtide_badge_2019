@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,13 @@
 #include "msp430fr2xx_4xxgeneric.h"
 #endif
 
+#ifndef ADCRES_1
+#define ADCRES_1                         (0x0010)        /* 10 bit */
+#endif
+#ifndef ADCCONSEQ
+#define ADCCONSEQ                        (0x0006)        /* conversion sequence mode select */
+#endif
+
 #include "stdint.h"
 #include "stdbool.h"
 
@@ -69,10 +76,11 @@
 //
 //*****************************************************************************
 #define HWREG32(x)                                                              \
-    (*((volatile uint32_t *)((uint16_t)x)))
+        (*((volatile uint32_t *)((uint16_t)x)))
 #define HWREG16(x)                                                             \
-    (*((volatile uint16_t *)((uint16_t)x)))
+        (*((volatile uint16_t *)((uint16_t)x)))
 #define HWREG8(x)                                                             \
-    (*((volatile uint8_t *)((uint16_t)x)))
+        (*((volatile uint8_t *)((uint16_t)x)))
+
 
 #endif // #ifndef __HW_MEMMAP__

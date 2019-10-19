@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,6 +160,19 @@ extern "C"
 
 //*****************************************************************************
 //
+// The following are values that can be passed to the offsetAddress parameter
+// for functions: SysCtl_setFRWPOA().
+//
+//*****************************************************************************
+#define SYSCTL_FRWPOA0                                                  FRWPOA0
+#define SYSCTL_FRWPOA1                                                  FRWPOA1
+#define SYSCTL_FRWPOA2                                                  FRWPOA2
+#define SYSCTL_FRWPOA3                                                  FRWPOA3
+#define SYSCTL_FRWPOA4                                                  FRWPOA4
+#define SYSCTL_FRWPOA5                                                  FRWPOA5
+
+//*****************************************************************************
+//
 // Prototypes for the APIs.
 //
 //*****************************************************************************
@@ -187,8 +200,8 @@ extern void SysCtl_enableDedicatedJTAGPins(void);
 //!
 //!
 //! \return One of the following:
-//!         - \b SysCtl_BSLENTRY_INDICATED
-//!         - \b SysCtl_BSLENTRY_NOTINDICATED
+//!         - \b SYSCTL_BSLENTRY_INDICATED
+//!         - \b SYSCTL_BSLENTRY_NOTINDICATED
 //!         \n indicating if a BSL entry sequence was detected
 //
 //*****************************************************************************
@@ -546,6 +559,28 @@ extern void SysCtl_disableInfrared(void);
 //
 //*****************************************************************************
 extern uint8_t SysCtl_getInfraredData(void);
+
+//*****************************************************************************
+//
+//! \brief This function sets the Program FRAM write protection offset address
+//! from the beginning of Program FRAM. The offset increases by 1 kB
+//! resolution.
+//!
+//! \param offsetAddress is the Program FRAM write protection offset address
+//!        from the beginning of Program FRAM, with offset increases of 1KB
+//!        resolution.
+//!        Mask value is the logical OR of any of the following:
+//!        - \b SYSCTL_FRWPOA0
+//!        - \b SYSCTL_FRWPOA1
+//!        - \b SYSCTL_FRWPOA2
+//!        - \b SYSCTL_FRWPOA3
+//!        - \b SYSCTL_FRWPOA4
+//!        - \b SYSCTL_FRWPOA5
+//!
+//! \return None
+//
+//*****************************************************************************
+extern void SysCtl_setFRWPOA(uint8_t offsetAddress);
 
 //*****************************************************************************
 //

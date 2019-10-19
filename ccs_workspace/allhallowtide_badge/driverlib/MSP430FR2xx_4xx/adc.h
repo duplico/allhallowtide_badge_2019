@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -138,8 +138,8 @@ extern "C"
 // parameter for functions: ADC_configureMemory().
 //
 //*****************************************************************************
-#define ADC_INPUT_VEREF_N                                           (ADCINCH_0)
-#define ADC_INPUT_VEREF_P                                           (ADCINCH_1)
+#define ADC_INPUT_A0                                                (ADCINCH_0)
+#define ADC_INPUT_A1                                                (ADCINCH_1)
 #define ADC_INPUT_A2                                                (ADCINCH_2)
 #define ADC_INPUT_A3                                                (ADCINCH_3)
 #define ADC_INPUT_A4                                                (ADCINCH_4)
@@ -227,9 +227,9 @@ extern "C"
 // parameter for functions: ADC_setResolution().
 //
 //*****************************************************************************
-#define ADC_RESOLUTION_8BIT                                               (0x0)
-#define ADC_RESOLUTION_10BIT                                             (0x10)
-#define ADC_RESOLUTION_12BIT                                             (0x20)
+#define ADC_RESOLUTION_8BIT                                            (0x0000)
+#define ADC_RESOLUTION_10BIT                                           (0x0010)
+#define ADC_RESOLUTION_12BIT                                           (0x0020)
 
 //*****************************************************************************
 //
@@ -448,14 +448,15 @@ extern void ADC_disableSamplingTimer(uint16_t baseAddress);
 //! reference voltage, the internal REF module has to control the voltage
 //! level. Note that if a conversion has been started with the
 //! startConversion() function, then a call to disableConversions() is required
-//! before this function may be called.
+//! before this function may be called. If conversion is not disabled, this
+//! function does nothing.
 //!
 //! \param baseAddress is the base address of the ADC module.
 //! \param inputSourceSelect is the input that will store the converted data
 //!        into the specified memory buffer.
 //!        Valid values are:
-//!        - \b ADC_INPUT_VEREF_N [Default]
-//!        - \b ADC_INPUT_VEREF_P
+//!        - \b ADC_INPUT_A0 [Default]
+//!        - \b ADC_INPUT_A1
 //!        - \b ADC_INPUT_A2
 //!        - \b ADC_INPUT_A3
 //!        - \b ADC_INPUT_A4
@@ -526,7 +527,7 @@ extern void ADC_configureMemory(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void ADC_enableInterrupt(uint16_t baseAddress,
-                                uint8_t interruptMask);
+                                uint16_t interruptMask);
 
 //*****************************************************************************
 //
@@ -560,7 +561,7 @@ extern void ADC_enableInterrupt(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void ADC_disableInterrupt(uint16_t baseAddress,
-                                 uint8_t interruptMask);
+                                 uint16_t interruptMask);
 
 //*****************************************************************************
 //
@@ -596,7 +597,7 @@ extern void ADC_disableInterrupt(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void ADC_clearInterrupt(uint16_t baseAddress,
-                               uint8_t interruptFlagMask);
+                               uint16_t interruptFlagMask);
 
 //*****************************************************************************
 //
@@ -640,19 +641,18 @@ extern uint8_t ADC_getInterruptStatus(uint16_t baseAddress,
 //! sample/hold signal source chosen during initialization was ADCOSC, then the
 //! conversion is started immediately, otherwise the chosen sample/hold signal
 //! source starts the conversion by a rising edge of the signal. Keep in mind
-//! when selecting conversion modes, that for sequenced                 and/or
-//! repeated modes, to keep the sample/hold-and-convert process continuing
-//! without a trigger from the sample/hold signal source, the multiple samples
-//! must be enabled using the ADC_setupSamplingTimer() function. Also note that
-//! when a sequence conversion mode is selected, the first input channel is the
-//! one mapped to the memory buffer, the next input channel selected for
-//! conversion is one less than the input channel just converted (i.e. A1 comes
-//! after A2), until A0 is reached, and if in repeating mode, then the next
-//! input channel will again be the one mapped to the memory buffer. Note that
-//! after this function is called, the ADC_stopConversions() has to be called
-//! to re-initialize the ADC, reconfigure a memory buffer control,
-//! enable/disable the sampling timer, or to change the internal reference
-//! voltage.
+//! when selecting conversion modes, that for sequenced and/or repeated modes,
+//! to keep the sample/hold-and-convert process continuing without a trigger
+//! from the sample/hold signal source, the multiple samples must be enabled
+//! using the ADC_setupSamplingTimer() function. Also note that when a sequence
+//! conversion mode is selected, the first input channel is the one mapped to
+//! the memory buffer, the next input channel selected for conversion is one
+//! less than the input channel just converted (i.e. A1 comes after A2), until
+//! A0 is reached, and if in repeating mode, then the next input channel will
+//! again be the one mapped to the memory buffer. Note that after this function
+//! is called, the ADC_stopConversions() has to be called to re-initialize the
+//! ADC, reconfigure a memory buffer control, enable/disable the sampling
+//! timer, or to change the internal reference voltage.
 //!
 //! \param baseAddress is the base address of the ADC module.
 //! \param conversionSequenceModeSelect determines the ADC operating mode.
@@ -677,7 +677,7 @@ extern uint8_t ADC_getInterruptStatus(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void ADC_startConversion(uint16_t baseAddress,
-                                uint8_t conversionSequenceModeSelect);
+                                uint16_t conversionSequenceModeSelect);
 
 //*****************************************************************************
 //
@@ -701,7 +701,7 @@ extern void ADC_startConversion(uint16_t baseAddress,
 //!        Valid values are:
 //!        - \b ADC_COMPLETECONVERSION - Allows the ADC to end the current
 //!           conversion before disabling conversions.
-//!        - \b ADC_PREEMPTCONVERSION - Stops the ADC10B immediatly, with
+//!        - \b ADC_PREEMPTCONVERSION - Stops the ADC10B immediately, with
 //!           unpredicatble results of the current conversion. Cannot be used
 //!           with repeated conversion.
 //!
@@ -744,14 +744,14 @@ extern int16_t ADC_getResults(uint16_t baseAddress);
 //!        Valid values are:
 //!        - \b ADC_RESOLUTION_8BIT
 //!        - \b ADC_RESOLUTION_10BIT [Default]
-//!        - \b ADC_RESOLUTION_12BIT
+//!        - \b ADC_RESOLUTION_12BIT - [Only available in some devices]
 //!        \n Modified bits are \b ADCRES of \b ADCCTL2 register.
 //!
 //! \return None
 //
 //*****************************************************************************
 extern void ADC_setResolution(uint16_t baseAddress,
-                              uint8_t resolutionSelect);
+                              uint16_t resolutionSelect);
 
 //*****************************************************************************
 //
@@ -878,6 +878,14 @@ extern uint32_t ADC_getMemoryAddressForDMA(uint16_t baseAddress);
 //
 //*****************************************************************************
 extern uint8_t ADC_isBusy(uint16_t baseAddress);
+
+//*****************************************************************************
+//
+// The following are deprecated defines.
+//
+//*****************************************************************************
+#define ADC_INPUT_VEREF_N                                          ADC_INPUT_A0
+#define ADC_INPUT_VEREF_P                                          ADC_INPUT_A1
 
 //*****************************************************************************
 //

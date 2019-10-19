@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,6 +111,16 @@ extern "C"
 //*****************************************************************************
 #define PMM_REFGEN_NOTREADY                                               (0x0)
 #define PMM_REFGEN_READY                                              REFGENRDY
+
+//*****************************************************************************
+//
+// The following are values that can be passed to the refV parameter for
+// functions: PMM_selectVoltageReference().
+//
+//*****************************************************************************
+#define PMM_REFVSEL_1_5V                                              REFVSEL_0
+#define PMM_REFVSEL_2_0V                                              REFVSEL_1
+#define PMM_REFVSEL_2_5V                                              REFVSEL_2
 
 //*****************************************************************************
 //
@@ -443,6 +453,41 @@ extern void PMM_disableInternalReference(void);
 //
 //*****************************************************************************
 extern void PMM_enableInternalReference(void);
+
+//*****************************************************************************
+//
+//! \brief Selects reference voltage level.
+//!
+//! This function selects the reference voltage level.
+//!
+//! \param refV is the reference voltage
+//!        Valid values are:
+//!        - \b PMM_REFVSEL_1_5V [Default]
+//!        - \b PMM_REFVSEL_2_0V
+//!        - \b PMM_REFVSEL_2_5V
+//!
+//! Modified bits are \b REFVSEL of \b PMMCTL2 register.
+//!
+//! \return None
+//
+//*****************************************************************************
+extern void PMM_selectVoltageReference(uint16_t refV);
+
+//*****************************************************************************
+//
+//! \brief Selects power supply in multi-power supply systems.
+//!
+//! This function selects power supply in multi power supply systems. A single
+//! power supply system is not affected by the bits.
+//!
+//! \param mode is the power mode
+//!
+//! Modified bits are \b PWRMODE of \b PMMCTL2 register.
+//!
+//! \return None
+//
+//*****************************************************************************
+extern void PMM_setPowerMode(uint8_t mode);
 
 //*****************************************************************************
 //

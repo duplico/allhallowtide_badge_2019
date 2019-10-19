@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,11 +60,10 @@ extern "C"
 //! parameter.
 //
 //*****************************************************************************
-typedef struct EUSCI_A_SPI_changeMasterClockParam
-{
-    //! Is the frequency of the selected clock source
+typedef struct EUSCI_A_SPI_changeMasterClockParam {
+    //! Is the frequency of the selected clock source in Hz
     uint32_t clockSourceFrequency;
-    //! Is the desired clock rate for SPI communication
+    //! Is the desired clock rate in Hz for SPI communication
     uint32_t desiredSpiClock;
 } EUSCI_A_SPI_changeMasterClockParam;
 
@@ -73,8 +72,7 @@ typedef struct EUSCI_A_SPI_changeMasterClockParam
 //! \brief Used in the EUSCI_A_SPI_initSlave() function as the param parameter.
 //
 //*****************************************************************************
-typedef struct EUSCI_A_SPI_initSlaveParam
-{
+typedef struct EUSCI_A_SPI_initSlaveParam {
     //! Controls the direction of the receive and transmit shift register.
     //! \n Valid values are:
     //! - \b EUSCI_A_SPI_MSB_FIRST
@@ -104,8 +102,7 @@ typedef struct EUSCI_A_SPI_initSlaveParam
 //! parameter.
 //
 //*****************************************************************************
-typedef struct EUSCI_A_SPI_initMasterParam
-{
+typedef struct EUSCI_A_SPI_initMasterParam {
     //! Selects Clock source. Refer to device specific datasheet for available
     //! options.
     //! \n Valid values are:
@@ -114,9 +111,9 @@ typedef struct EUSCI_A_SPI_initMasterParam
     //! - \b EUSCI_A_SPI_CLOCKSOURCE_MODCLK
     //! - \b EUSCI_A_SPI_CLOCKSOURCE_SMCLK
     uint8_t selectClockSource;
-    //! Is the frequency of the selected clock source
+    //! Is the frequency of the selected clock source in Hz
     uint32_t clockSourceFrequency;
-    //! Is the desired clock rate for SPI communication
+    //! Is the desired clock rate in Hz for SPI communication
     uint32_t desiredSpiClock;
     //! Controls the direction of the receive and transmit shift register.
     //! \n Valid values are:
@@ -140,6 +137,7 @@ typedef struct EUSCI_A_SPI_initMasterParam
     //! - \b EUSCI_A_SPI_4PIN_UCxSTE_ACTIVE_LOW
     uint16_t spiMode;
 } EUSCI_A_SPI_initMasterParam;
+
 
 //*****************************************************************************
 //
@@ -198,7 +196,7 @@ typedef struct EUSCI_A_SPI_initMasterParam
 // parameter for functions: EUSCI_A_SPI_select4PinFunctionality().
 //
 //*****************************************************************************
-#define EUSCI_A_SPI_PREVENT_CONFLICTS_WITH_OTHER_MASTERS                   0x00
+#define EUSCI_A_SPI_PREVENT_CONFLICTS_WITH_OTHER_MASTERS                 0x0000
 #define EUSCI_A_SPI_ENABLE_SIGNAL_FOR_4WIRE_SLAVE                        UCSTEM
 
 //*****************************************************************************
@@ -227,8 +225,8 @@ typedef struct EUSCI_A_SPI_initMasterParam
 // functions: EUSCI_A_SPI_remapPins().
 //
 //*****************************************************************************
-#define EUSCI_A_SPI_REMAP_PINS_1                                           0x00
-#define EUSCI_A_SPI_REMAP_PINS_2                                           0x01
+#define EUSCI_A_SPI_REMAP_PINS_FALSE                                   (0x0000)
+#define EUSCI_A_SPI_REMAP_PINS_TRUE                                  (USCIARMP)
 
 //*****************************************************************************
 //
@@ -275,7 +273,7 @@ extern void EUSCI_A_SPI_initMaster(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void EUSCI_A_SPI_select4PinFunctionality(uint16_t baseAddress,
-                                                uint8_t select4PinFunctionality);
+                                                uint16_t select4PinFunctionality);
 
 //*****************************************************************************
 //
@@ -389,7 +387,7 @@ extern uint8_t EUSCI_A_SPI_receiveData(uint16_t baseAddress);
 //
 //*****************************************************************************
 extern void EUSCI_A_SPI_enableInterrupt(uint16_t baseAddress,
-                                        uint8_t mask);
+                                        uint16_t mask);
 
 //*****************************************************************************
 //
@@ -411,7 +409,7 @@ extern void EUSCI_A_SPI_enableInterrupt(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void EUSCI_A_SPI_disableInterrupt(uint16_t baseAddress,
-                                         uint8_t mask);
+                                         uint16_t mask);
 
 //*****************************************************************************
 //
@@ -451,7 +449,7 @@ extern uint8_t EUSCI_A_SPI_getInterruptStatus(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void EUSCI_A_SPI_clearInterrupt(uint16_t baseAddress,
-                                       uint8_t mask);
+                                       uint16_t mask);
 
 //*****************************************************************************
 //
@@ -535,20 +533,29 @@ extern uint16_t EUSCI_A_SPI_isBusy(uint16_t baseAddress);
 //! Remaps eUSCI_A GPIO pins. After calling this function,
 //! GPIO_setAsPeripheralModuleFunctionInputPin() or
 //! GPIO_setAsPeripheralModuleFunctionInputPin() still needs to be invoked to
-//! set peripheral functions.
+//! set peripheral functions. Caution: this will also remap eusci_a_uart GPIO
+//! pins.
 //!
 //! \param baseAddress is the base address of the EUSCI_A_SPI module.
 //! \param pinsSelect remapping pins to select. Please refer to device specific
 //!        datasheet for remapping pins details.
 //!        Valid values are:
-//!        - \b EUSCI_A_SPI_REMAP_PINS_1 [Default]
-//!        - \b EUSCI_A_SPI_REMAP_PINS_2
+//!        - \b EUSCI_A_SPI_REMAP_PINS_FALSE [Default]
+//!        - \b EUSCI_A_SPI_REMAP_PINS_TRUE
 //!
 //! \return None
 //
 //*****************************************************************************
 extern void EUSCI_A_SPI_remapPins(uint16_t baseAddress,
                                   uint8_t pinsSelect);
+
+//*****************************************************************************
+//
+// The following are deprecated #defines.
+//
+//*****************************************************************************
+#define EUSCI_A_SPI_REMAP_PINS_1                   EUSCI_A_SPI_REMAP_PINS_FALSE
+#define EUSCI_A_SPI_REMAP_PINS_2                    EUSCI_A_SPI_REMAP_PINS_TRUE
 
 //*****************************************************************************
 //

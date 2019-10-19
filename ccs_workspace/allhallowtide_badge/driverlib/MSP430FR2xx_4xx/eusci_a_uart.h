@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,7 @@ extern "C"
 //! \brief Used in the EUSCI_A_UART_init() function as the param parameter.
 //
 //*****************************************************************************
-typedef struct EUSCI_A_UART_initParam
-{
+typedef struct EUSCI_A_UART_initParam {
     //! Selects Clock source. Refer to device specific datasheet for available
     //! options.
     //! \n Valid values are:
@@ -116,6 +115,7 @@ typedef struct EUSCI_A_UART_initParam
     //! - \b EUSCI_A_UART_LOW_FREQUENCY_BAUDRATE_GENERATION
     uint8_t overSampling;
 } EUSCI_A_UART_initParam;
+
 
 //*****************************************************************************
 //
@@ -237,8 +237,8 @@ typedef struct EUSCI_A_UART_initParam
 // functions: EUSCI_A_UART_remapPins().
 //
 //*****************************************************************************
-#define EUSCI_A_UART_REMAP_PINS_1                                          0x00
-#define EUSCI_A_UART_REMAP_PINS_2                                          0x01
+#define EUSCI_A_UART_REMAP_PINS_FALSE                                  (0x0000)
+#define EUSCI_A_UART_REMAP_PINS_TRUE                                 (USCIARMP)
 
 //*****************************************************************************
 //
@@ -422,7 +422,7 @@ extern uint8_t EUSCI_A_UART_getInterruptStatus(uint16_t baseAddress,
 //
 //*****************************************************************************
 extern void EUSCI_A_UART_clearInterrupt(uint16_t baseAddress,
-                                        uint8_t mask);
+                                        uint16_t mask);
 
 //*****************************************************************************
 //
@@ -612,20 +612,29 @@ extern void EUSCI_A_UART_selectDeglitchTime(uint16_t baseAddress,
 //! Remaps eUSCI_A GPIO pins. After calling this function,
 //! GPIO_setAsPeripheralModuleFunctionInputPin() or
 //! GPIO_setAsPeripheralModuleFunctionInputPin() still needs to be invoked to
-//! set peripheral functions.
+//! set peripheral functions. Caution: this will also remap eusci_a_spi GPIO
+//! pins.
 //!
 //! \param baseAddress is the base address of the EUSCI_A_UART module.
 //! \param pinsSelect remapping pins to select. Please refer to device specific
 //!        datasheet for remapping pins details.
 //!        Valid values are:
-//!        - \b EUSCI_A_UART_REMAP_PINS_1 [Default]
-//!        - \b EUSCI_A_UART_REMAP_PINS_2
+//!        - \b EUSCI_A_UART_REMAP_PINS_FALSE [Default]
+//!        - \b EUSCI_A_UART_REMAP_PINS_TRUE
 //!
 //! \return None
 //
 //*****************************************************************************
 extern void EUSCI_A_UART_remapPins(uint16_t baseAddress,
                                    uint8_t pinsSelect);
+
+//*****************************************************************************
+//
+// The following are deprecated #defines.
+//
+//*****************************************************************************
+#define EUSCI_A_UART_REMAP_PINS_1                 EUSCI_A_UART_REMAP_PINS_FALSE
+#define EUSCI_A_UART_REMAP_PINS_2                  EUSCI_A_UART_REMAP_PINS_TRUE
 
 //*****************************************************************************
 //

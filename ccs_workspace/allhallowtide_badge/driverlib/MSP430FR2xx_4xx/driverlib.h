@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,25 +31,26 @@
  * --/COPYRIGHT--*/
 #include "inc/hw_memmap.h"
 
-#include "adc.h"
+#include "rtc.h"
+#include "sysctl.h"
+#include "eusci_b_i2c.h"
 #include "crc.h"
+#include "lcd_e.h"
 #include "cs.h"
 #include "ecomp.h"
-#include "eusci_a_spi.h"
-#include "eusci_a_uart.h"
-#include "eusci_b_i2c.h"
-#include "eusci_b_spi.h"
-#include "framctl.h"
-#include "gpio.h"
-#include "lcd_e.h"
 #include "mpy32.h"
-#include "pmm.h"
-#include "rtc.h"
+#include "framctl.h"
+#include "adc.h"
 #include "sac.h"
 #include "sfr.h"
-#include "sysctl.h"
-#include "timer_a.h"
-#include "timer_b.h"
-#include "tlv.h"
-#include "tri.h"
 #include "wdt_a.h"
+#include "icc.h"
+#include "timer_a.h"
+#include "pmm.h"
+#include "eusci_a_uart.h"
+#include "gpio.h"
+#include "tlv.h"
+#include "tia.h"
+#include "eusci_a_spi.h"
+#include "timer_b.h"
+#include "eusci_b_spi.h"

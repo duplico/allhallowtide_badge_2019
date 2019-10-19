@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,23 @@ extern "C"
 {
 #endif
 
+#include "inc/hw_memmap.h"
+//*****************************************************************************
+//
+//! \brief Used in the CS_initFLLCalculateTrim(), CS_initFLLLoadTrim()
+//! functions as the param parameter.
+//
+//*****************************************************************************
+typedef struct CS_initFLLParam {
+    //! Contains software trim value for DCOTAP
+    uint16_t csCtl0;
+    //! Contains software trim value for DCOFTRIM
+    uint16_t csCtl1;
+    //! Is the target frequency for MCLK in kHz
+    uint16_t fsystem;
+} CS_initFLLParam;
+
+
 //*****************************************************************************
 //
 // The following are values that can be passed to the clockSourceDivider
@@ -72,6 +89,10 @@ extern "C"
 #define CS_CLOCK_DIVIDER_512                                                0xA
 #define CS_CLOCK_DIVIDER_768                                                0xB
 #define CS_CLOCK_DIVIDER_1024                                               0xC
+#define CS_CLOCK_DIVIDER_108                                                0xD
+#define CS_CLOCK_DIVIDER_338                                                0xE
+#define CS_CLOCK_DIVIDER_414                                                0xF
+#define CS_CLOCK_DIVIDER_640                                               0x10
 
 //*****************************************************************************
 //
@@ -169,16 +190,14 @@ extern void CS_setExternalClockSource(uint32_t XT1CLK_frequency);
 
 //*****************************************************************************
 //
-//! \brief Initalizes a clock signal
+//! \brief Initializes a clock signal
 //!
 //! This function initializes each of the clock signals. The user must ensure
 //! that this function is called for each clock signal. If not, the default
-//! state is assumed for the particular clock signal. Refer MSP430Ware
-//! documentation for CS module or Device Family User's Guide for details of
-//! default clock signal states. Note that the dividers for \b CS_FLLREF are
-//! different from the available clock dividers. Some devices do not support
-//! dividers setting for \b CS_FLLREF, please refer to device specific
-//! datasheet for details.
+//! state is assumed for the particular clock signal. Please check the device
+//! specific data sheet for details on the following:                 Some
+//! devices do not support divider settings for \b CS_FLLREF.
+//! VLO is only a valid clock source for ACLK on some devices.
 //!
 //! \param selectedClockSignal selected clock signal
 //!        Valid values are:
@@ -207,8 +226,19 @@ extern void CS_setExternalClockSource(uint32_t XT1CLK_frequency);
 //!        - \b CS_CLOCK_DIVIDER_256 - [Valid for CS_FLLREF, CS_ACLK]
 //!        - \b CS_CLOCK_DIVIDER_384 - [Valid for CS_FLLREF, CS_ACLK]
 //!        - \b CS_CLOCK_DIVIDER_512 - [Valid for CS_FLLREF, CS_ACLK]
-//!        - \b CS_CLOCK_DIVIDER_768 - [Valid for CS_FLLREF, CS_ACLK]
-//!        - \b CS_CLOCK_DIVIDER_1024 - [Valid for CS_FLLREF, CS_ACLK]
+//!        - \b CS_CLOCK_DIVIDER_768 - [Valid for CS_FLLREF, CS_ACLK] [Only
+//!           available in 24MHz clock system] [If CS_ACLK, 24 MHz preference]
+//!        - \b CS_CLOCK_DIVIDER_1024 - [Valid for CS_FLLREF, CS_ACLK] [Only
+//!           available in 24MHz clock system] [If CS_ACLK, 32 MHz preference]
+//!        - \b CS_CLOCK_DIVIDER_108 - [Valid for CS_ACLK] [Only available in
+//!           24MHz clock system] [If CS_ACLK, 3.5712 MHz preference]
+//!        - \b CS_CLOCK_DIVIDER_338 - [Valid for CS_ACLK] [Only available in
+//!           24MHz clock system] [If CS_ACLK, 11.0592 MHz preference]
+//!        - \b CS_CLOCK_DIVIDER_414 - [Valid for CS_ACLK] [Only available in
+//!           24MHz clock system] [If CS_ACLK, 13.56 MHz preference]
+//!        - \b CS_CLOCK_DIVIDER_640 - [Valid for CS_FLLREF, CS_ACLK] [Only
+//!           available in 24MHz clock system] [If CS_ACLK, 20.00 MHz
+//!           preference]
 //!
 //! Modified bits of \b CSCTL3 register, bits of \b CSCTL5 register and bits of
 //! \b CSCTL4 register.
@@ -336,10 +366,11 @@ extern void CS_turnOffXT1(void);
 //!        \n Modified bits are \b XT1DRIVE of \b UCSCTL6 register.
 //! \param xt1HFFreq is the high frequency range selection.
 //!        Valid values are:
-//!        - \b CS_XT1_HFFREQ_1MHZ_4MHZ [Default]
-//!        - \b CS_XT1_HFFREQ_4MHZ_6MHZ
-//!        - \b CS_XT1_HFFREQ_6MHZ_16MHZ
-//!        - \b CS_XT1_HFFREQ_16MHZ_24MHZ
+//!        - \b CS_XT1_HFFREQ_1MHZ_4MHZ [Default] - 1 MHz to 4 MHz
+//!        - \b CS_XT1_HFFREQ_4MHZ_6MHZ - Above 4 MHz to 6 MHz
+//!        - \b CS_XT1_HFFREQ_6MHZ_16MHZ - Above 6 MHz to 16 MHz
+//!        - \b CS_XT1_HFFREQ_16MHZ_24MHZ - Above 16 MHz to 24 MHz (Only
+//!           available in 24MHz clock system)
 //!
 //! \return None
 //
@@ -366,10 +397,11 @@ extern void CS_turnOnXT1HF(uint16_t xt1Drive,
 //!        - \b CS_XT1_DRIVE_3 [Default]
 //! \param xt1HFFreq is the high frequency range selection.
 //!        Valid values are:
-//!        - \b CS_XT1_HFFREQ_1MHZ_4MHZ [Default]
-//!        - \b CS_XT1_HFFREQ_4MHZ_6MHZ
-//!        - \b CS_XT1_HFFREQ_6MHZ_16MHZ
-//!        - \b CS_XT1_HFFREQ_16MHZ_24MHZ
+//!        - \b CS_XT1_HFFREQ_1MHZ_4MHZ [Default] - 1 MHz to 4 MHz
+//!        - \b CS_XT1_HFFREQ_4MHZ_6MHZ - Above 4 MHz to 6 MHz
+//!        - \b CS_XT1_HFFREQ_6MHZ_16MHZ - Above 6 MHz to 16 MHz
+//!        - \b CS_XT1_HFFREQ_16MHZ_24MHZ - Above 16 MHz to 24 MHz (Only
+//!           available in 24MHz clock system)
 //! \param timeout is the count value that gets decremented every time the loop
 //!        that clears oscillator fault flags gets executed.
 //!
@@ -430,11 +462,12 @@ extern void CS_disableVLOAutoOff(void);
 //!
 //! Initializes the DCO to operate a frequency that is a multiple of the
 //! reference frequency into the FLL. Loops until all oscillator fault flags
-//! are cleared, with a timeout. If the frequency is greater than 16 MHz, the
-//! function sets the MCLK and SMCLK source to the undivided DCO frequency.
-//! Otherwise, the function sets the MCLK and SMCLK source to the DCOCLKDIV
-//! frequency. This function executes a software delay that is proportional in
-//! length to the ratio of the target FLL frequency and the FLL reference.
+//! are cleared, with a timeout. If the frequency is greater than clock system
+//! allows, the function sets the MCLK and SMCLK source to the undivided DCO
+//! frequency and returns false. Otherwise, the function sets the MCLK and
+//! SMCLK source to the DCOCLKDIV frequency. This function executes a software
+//! delay that is proportional in length to the ratio of the target FLL
+//! frequency and the FLL reference.
 //!
 //! \param fsystem is the target frequency for MCLK in kHz
 //! \param ratio is the ratio x/y, where x = fsystem and y = FLL reference
@@ -444,23 +477,24 @@ extern void CS_disableVLOAutoOff(void);
 //! CSCTL2 register, bits of \b CSCTL4 register, bits of \b CSCTL7 register and
 //! bits of \b SFRIFG1 register.
 //!
-//! \return None
+//! \return True if successful, false if unsuccessful and resorted to undivided
+//!         DCO frequency for MCLK and SMCLK source
 //
 //*****************************************************************************
-extern void CS_initFLLSettle(uint16_t fsystem,
+extern bool CS_initFLLSettle(uint16_t fsystem,
                              uint16_t ratio);
 
 //*****************************************************************************
 //
 //! \brief Initializes the DCO to operate a frequency that is a multiple of the
-//! reference frequency into the FLL
+//! reference frequency into the FLL. This function performs DCO Factory Trim.
 //!
 //! Initializes the DCO to operate a frequency that is a multiple of the
 //! reference frequency into the FLL. Loops until all oscillator fault flags
-//! are cleared, with no timeout. If the frequency is greater than 16 MHz, the
-//! function sets the MCLK and SMCLK source to the undivided DCO frequency.
-//! Otherwise, the function sets the MCLK and SMCLK source to the DCOCLKDIV
-//! frequency.
+//! are cleared, with a timeout. If the frequency is greater than clock system
+//! allows, the function sets the MCLK and SMCLK source to the undivided DCO
+//! frequency and returns false. Otherwise, the function sets the MCLK and
+//! SMCLK source to the DCOCLKDIV frequency.
 //!
 //! \param fsystem is the target frequency for MCLK in kHz
 //! \param ratio is the ratio x/y, where x = fsystem and y = FLL reference
@@ -470,11 +504,78 @@ extern void CS_initFLLSettle(uint16_t fsystem,
 //! CSCTL2 register, bits of \b CSCTL4 register, bits of \b CSCTL7 register and
 //! bits of \b SFRIFG1 register.
 //!
-//! \return None
+//! \return True if successful, false if unsuccessful and resorted to undivided
+//!         DCO frequency for MCLK and SMCLK source
 //
 //*****************************************************************************
-extern void CS_initFLL(uint16_t fsystem,
+extern bool CS_initFLL(uint16_t fsystem,
                        uint16_t ratio);
+
+//*****************************************************************************
+//
+//! \brief Performs same function as initFLLSettle in addition to setting the
+//! proper DCOFTRIM according to clock frequency. This function performs DCO
+//! Software Trim and saves the trim value into initFLLParam.
+//!
+//! Initializes the DCO to operate a frequency that is a multiple of the
+//! reference frequency into the FLL. Loops until all oscillator fault flags
+//! are cleared, with a timeout. If the frequency is greater than clock system
+//! allows, the function sets the MCLK and SMCLK source to the undivided DCO
+//! frequency and returns false. Otherwise, the function sets the MCLK and
+//! SMCLK source to the DCOCLKDIV frequency. This function executes a software
+//! delay that is proportional in length to the ratio of the target FLL
+//! frequency and the FLL reference. It also calibrates the DCOFTRIM value
+//! according to clock frequency. Lastly, it saves the DCOTAP and DCOFTRIM
+//! values for future use.
+//!
+//! \param fsystem is the target frequency for MCLK in kHz
+//! \param ratio is the ratio x/y, where x = fsystem and y = FLL reference
+//!        frequency.
+//!
+//! Modified bits of \b CSCTL1 register, bits of \b CSCTL0 register, bits of \b
+//! CSCTL2 register, bits of \b CSCTL4 register, bits of \b CSCTL7 register and
+//! bits of \b SFRIFG1 register.
+//!
+//! \return True if successful, false if unsuccessful and resorted to undivided
+//!         DCO frequency for MCLK and SMCLK source
+//
+//*****************************************************************************
+extern bool CS_initFLLCalculateTrim(uint16_t fsystem,
+                                    uint16_t ratio,
+                                    CS_initFLLParam *param);
+
+//*****************************************************************************
+//
+//! \brief Performs same function as initFLLCalculateTrim without the overhead
+//! of calculating the trim, but rather using the one specified in param. This
+//! function corresponds with the DCO Software Trim.
+//!
+//! Initializes the DCO to operate a frequency that is a multiple of the
+//! reference frequency into the FLL. Loops until all oscillator fault flags
+//! are cleared, with a timeout. If the frequency is greater than clock system
+//! allows, the function sets the MCLK and SMCLK source to the undivided DCO
+//! frequency and returns false. Otherwise, the function sets the MCLK and
+//! SMCLK source to the DCOCLKDIV frequency. This function executes a software
+//! delay that is proportional in length to the ratio of the target FLL
+//! frequency and the FLL reference. Lastly, it uses the saved DCOTAP and
+//! DCOFTRIM values from the param to avoid overhead in recalculation.
+//!
+//! \param fsystem is the target frequency for MCLK in kHz
+//! \param ratio is the ratio x/y, where x = fsystem and y = FLL reference
+//!        frequency.
+//!
+//! Modified bits of \b CSCTL1 register, bits of \b CSCTL0 register, bits of \b
+//! CSCTL2 register, bits of \b CSCTL4 register, bits of \b CSCTL7 register and
+//! bits of \b SFRIFG1 register.
+//!
+//! \return True if initialization successful, false if saved DCOFTRIM value is
+//!         not for the correct clock frequency combination or resorted to
+//!         undivided DCO frequency for MCLK and SMCLK source
+//
+//*****************************************************************************
+extern bool CS_initFLLLoadTrim(uint16_t fsystem,
+                               uint16_t ratio,
+                               CS_initFLLParam *param);
 
 //*****************************************************************************
 //
@@ -651,6 +752,84 @@ extern void CS_enableFLLUnlock(void);
 //
 //*****************************************************************************
 extern void CS_disableFLLUnlock(void);
+
+//*****************************************************************************
+//
+//! \brief Enable low-power REFO.
+//!
+//!
+//! Modified bits are \b REFOLP of \b CSCTL3 register.
+//!
+//! \return None
+//
+//*****************************************************************************
+extern void CS_enableREFOLP(void);
+
+//*****************************************************************************
+//
+//! \brief Disable low-power REFO.
+//!
+//!
+//! Modified bits are \b REFOLP of \b CSCTL3 register.
+//!
+//! \return None
+//
+//*****************************************************************************
+extern void CS_disableREFOLP(void);
+
+//*****************************************************************************
+//
+//! \brief Get status of low-power REFO.
+//!
+//!
+//! \return Get status of low-power REFO.
+//
+//*****************************************************************************
+extern bool CS_getREFOLP(void);
+
+//*****************************************************************************
+//
+//! \brief Turns off switching from XT1 to REFO when XT1 fails.
+//!
+//!
+//! Modified bits are \b XT1FAULTOFF of \b CSCTL6 register.
+//!
+//! \return None
+//
+//*****************************************************************************
+extern void CS_enableXT1FaultOff(void);
+
+//*****************************************************************************
+//
+//! \brief Turns on switching from XT1 to REFO when XT1 fails.
+//!
+//!
+//! Modified bits are \b XT1FAULTOFF of \b CSCTL6 register.
+//!
+//! \return None
+//
+//*****************************************************************************
+extern void CS_disableXT1FaultOff(void);
+
+//*****************************************************************************
+//
+//! \brief Get status of XT1 fault switching.
+//!
+//!
+//! \return Get status of XT1 fault switching.
+//
+//*****************************************************************************
+extern bool CS_getXT1FaultOff(void);
+
+//*****************************************************************************
+//
+//! \brief Get status indication of low-power REFO switching.
+//!
+//!
+//! \return Get status indication of low-power REFO switching.
+//
+//*****************************************************************************
+extern bool CS_getREFOReady(void);
 
 //*****************************************************************************
 //

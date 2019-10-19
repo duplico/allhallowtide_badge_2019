@@ -1,5 +1,5 @@
 /* --COPYRIGHT--,BSD
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,8 +59,7 @@ extern "C"
 //! \brief Used in the LCD_E_init() function as the initParams parameter.
 //
 //*****************************************************************************
-typedef struct LCD_E_initParam
-{
+typedef struct LCD_E_initParam {
     //! Selects the clock that will be used by the LCD_E.
     //! \n Valid values are:
     //! - \b LCD_E_CLOCKSOURCE_XTCLK [Default]
@@ -244,7 +243,7 @@ extern const LCD_E_initParam LCD_E_INIT_PARAM;
 #define LCD_E_BLINK_FREQ_CLOCK_PRESCALAR_128          (LCDBLKPRE2 | LCDBLKPRE0)
 #define LCD_E_BLINK_FREQ_CLOCK_PRESCALAR_256          (LCDBLKPRE2 | LCDBLKPRE1)
 #define LCD_E_BLINK_FREQ_CLOCK_PRESCALAR_512                                  \
-    (LCDBLKPRE2 | LCDBLKPRE1 | LCDBLKPRE0)
+                                         (LCDBLKPRE2 | LCDBLKPRE1 | LCDBLKPRE0)
 
 //*****************************************************************************
 //
@@ -443,7 +442,7 @@ extern const LCD_E_initParam LCD_E_INIT_PARAM;
 #define LCD_E_CHARGEPUMP_FREQ_14         (LCDCPFSEL3 | LCDCPFSEL2 | LCDCPFSEL0)
 #define LCD_E_CHARGEPUMP_FREQ_15         (LCDCPFSEL3 | LCDCPFSEL2 | LCDCPFSEL1)
 #define LCD_E_CHARGEPUMP_FREQ_16                                              \
-    (LCDCPFSEL3 | LCDCPFSEL2 | LCDCPFSEL1 | LCDCPFSEL0)
+                            (LCDCPFSEL3 | LCDCPFSEL2 | LCDCPFSEL1 | LCDCPFSEL0)
 
 //*****************************************************************************
 //
