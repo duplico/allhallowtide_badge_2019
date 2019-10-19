@@ -1,3 +1,5 @@
 syntax: glob
 ccs_workspace/.metadata
 ccs_workspace/allhallowtide_badge/Debug
+ccs_workspace/.jxbrowser-data
+captivate/allhallowtide2019/src/
