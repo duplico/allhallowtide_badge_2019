@@ -144,38 +144,12 @@ def main():
                 ink_line += lines[line_no]
                 line_no += 1            
             
-            ink = list(map(lambda s: int(s.strip()), ink_line.split(',')))
-            ink_frames = [ink[i:i+10] for i in range(0, len(ink), 10)]
-            
-            assert "DOUBLE" in lines[line_no].upper()
-            line_no += 1
-            
-            if "WIGGLE" in lines[line_no].upper():
-                wiggles.append(1)
-                line_no += 1
-            else:
-                wiggles.append(0)
-                
-            local_type = lines[line_no]
-            assert local_type[0] not in string.digits
-            if local_type not in all_types: all_types.append(local_type)
-            anim_types.append(local_type)
-            line_no += 1
-            
-            while line_no < len(lines):
-                # Consume the animation. Ignore white space
-                doubleink_line += lines[line_no]
-                line_no += 1            
-            
-            doubleink = list(map(lambda s: int(s.strip()), doubleink_line.split(',')))
-            doubleink_frames = [doubleink[i:i+10] for i in range(0, len(doubleink), 10)]
-            
             # Great. Now we've ingested the entire file.
             # Time to start generating frames.
             
             local_animation_names = []
             
-            for l, lname, atype, wiggle in ((camo_frames, 'camo', anim_types[0], wiggles[0]), (ink_frames, 'boop', anim_types[1], wiggles[1]), (doubleink_frames, 'bigboop', anim_types[2], wiggles[2])):
+            for l, lname, atype, wiggle in ((camo_frames, 'camo', anim_types[0], wiggles[0]), ):
                 if anim_name.startswith("zflag") and lname == 'boop': break
                 c_lines.append("// frames for %s" % lname)
                 c_lines.append("const rgbcolor_t %s_%s_frames[][4] = {" % (anim_name, lname))
