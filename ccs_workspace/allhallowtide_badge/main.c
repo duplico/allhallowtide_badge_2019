@@ -2,7 +2,11 @@
 #include <msp430fr2512.h>
 
 #include "tlc5948a.h"
+
 #include "CAPT_App.h"
+#include "leds.h"
+
+volatile uint8_t f_time_loop;
 
 /// Initialize clock signals and the three system clocks.
 /**
@@ -126,27 +130,44 @@ int main(void) {
 
     tlc_init();
 
+    // TODO: Refactor to another function.
+    // For our timer, we're going to use ACLK, which is sourced from REFO.
+    //  (REFO is 32k)
+    // We'd like to have this run at like 60-100 Hz, I think.
+    // We'll divide our 32k clock by 64 to get 512 Hz.
+    // Then, we'll use a period of 8 to get 64ish frames per second.
+    // TODO: Eliminate driverlib.
+    Timer_A_initUpModeParam next_channel_timer_init = {};
+    next_channel_timer_init.clockSource = TIMER_A_CLOCKSOURCE_ACLK;
+    next_channel_timer_init.clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_64;
+    next_channel_timer_init.timerPeriod = 2;
+    next_channel_timer_init.timerInterruptEnable_TAIE = TIMER_A_TAIE_INTERRUPT_DISABLE;
+    next_channel_timer_init.captureCompareInterruptEnable_CCR0_CCIE = TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE;
+    next_channel_timer_init.timerClear = TIMER_A_SKIP_CLEAR;
+    next_channel_timer_init.startTimer = false;
+
+    Timer_A_initUpMode(TIMER_A0_BASE, &next_channel_timer_init);
+    Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
+
     __bis_SR_register(GIE);
 
     CAPT_appStart();
 
     while(1)
     {
-        //
-        // Run the captivate application handler.
-        //
+        // Handle (or attempt to handle) and needed CapTIvate signals:
         CAPT_appHandler();
 
-        //
-        // This is a great place to add in any
-        // background application code.
-        //
-        __no_operation();
+        if (f_time_loop) {
+            leds_timestep();
+            f_time_loop = 0;
+        }
 
-        //
-        // End of background loop iteration
-        // Go to sleep if there is nothing left to do
-        //
+        // TODO: Determine if this is needed:
+        if (f_time_loop) {
+            continue;
+        }
+
         CAPT_appSleep();
 
     } // End background loop
@@ -156,4 +177,12 @@ int _system_pre_init(void)
 {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     return 1;
+}
+
+// Dedicated ISR for CCR0. Vector is cleared on service.
+#pragma vector=TIMER0_A0_VECTOR
+__interrupt void TIMER0_A0_ISR_HOOK(void)
+{
+    f_time_loop = 1;
+    __bic_SR_register_on_exit(LPM0_bits);
 }

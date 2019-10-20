@@ -10,6 +10,14 @@
 
 #include <stdint.h>
 
+#define BAND_LED_COUNT 4
+
+// TODO: This needs something like the LED_DUR_LOOPS from the old way:
+
+#define BAND_TWINKLE_STEPS_FAST 50
+#define BAND_TWINKLE_STEPS_SLOW 400
+#define BAND_TWINKLE_STEPS_HARD 40
+
 typedef struct {
     uint16_t red;
     uint16_t green;
@@ -31,5 +39,7 @@ typedef struct {
     uint8_t wiggle;
     uint8_t boop_loops;
 } band_animation_t;
+
+void leds_timestep();
 
 #endif /* LEDS_H_ */
