@@ -29,17 +29,20 @@ volatile uint8_t f_time_loop;
  */
 void init_clocks() {
     // DCO  (Digitally-controlled oscillator)
-    //  Let's bring this up to 16 MHz or so.
+    //  Let's bring this up to 8 MHz or so.
+
+    // TODO:
+    // Configure FRAM wait state (set to 1 to support 16MHz MCLK)
+//    FRAMCtl_configureWaitStateControl(FRAMCTL_ACCESS_TIME_CYCLES_1);
 
     __bis_SR_register(SCG0);                // disable FLL
     CSCTL3 |= SELREF__REFOCLK;              // Set REFO as FLL reference source
     CSCTL0 = 0;                             // clear DCO and MOD registers
     CSCTL1 &= ~(DCORSEL_7);                 // Clear DCO frequency select bits first
-    CSCTL1 |= DCORSEL_5;                    // Set DCO = 16MHz
-
+    CSCTL1 |= DCORSEL_3;                    // Set DCO = 8MHz
     // CSCTL feedback loop:
-    // (f_output = (FLLN + 1) * (322768 Hz / outputDiv)
-    CSCTL2 = FLLD_0 + 487;                  // DCODIV = /1
+    CSCTL2 = FLLD_0 + 243;                  // DCODIV = /1
+
     __delay_cycles(3);
     __bic_SR_register(SCG0);                // enable FLL
     while(CSCTL7 & (FLLUNLOCK0 | FLLUNLOCK1)); // Poll until FLL is locked
@@ -47,17 +50,17 @@ void init_clocks() {
     // SYSTEM CLOCKS
     // =============
 
-    // MCLK (16 MHz)
+    // MCLK (8 MHz)
     //  All sources but MODOSC are available at up to /128
-    //  Set to DCO/1 = 16 MHz
+    //  Set to DCO/1 = 8 MHz
     // DIVM__1;
 
     // SMCLK (8 MHz)
     //  Derived from MCLK with divider up to /8
-    //  Set to MCLK/8 = 2 MHz
-    // DIVS__8;
+    //  Set to MCLK/1 = 8 MHz
+    // DIVS__1;
 
-    CSCTL5 = VLOAUTOOFF_1 | DIVS__8 | DIVM__1;
+    CSCTL5 = VLOAUTOOFF_1 | DIVS__1 | DIVM__1;
 }
 
 /// Apply the initial configuration of the GPIO and peripheral pins.
@@ -122,13 +125,10 @@ int main(void) {
 
     WDTCTL = WDTPW | WDTHOLD;
 
-    // TODO:
-    // Configure FRAM wait state (set to 1 to support 16MHz MCLK)
-    FRAMCtl_configureWaitStateControl(FRAMCTL_ACCESS_TIME_CYCLES_1);
-
-    init_clocks();
+//    init_clocks();
     init_io();
 
+    __bis_SR_register(GIE);
     tlc_init();
 
     // TODO: Refactor to another function.
@@ -150,19 +150,27 @@ int main(void) {
     Timer_A_initUpMode(TIMER_A0_BASE, &next_channel_timer_init);
     Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
 
-    __bis_SR_register(GIE);
+    tlc_stage_blank(0);
+    for (uint8_t i=0; i<16; i++) {
+        tlc_gs[i] = 0x0fff;
+    }
 
-    CAPT_appStart();
+    tlc_set_fun();
+    tlc_set_gs();
+    tlc_set_fun();
+
+
+//    CAPT_appStart();
 
     while(1)
     {
         // Handle (or attempt to handle) and needed CapTIvate signals:
-        if (CAPT_appHandler()) {
-            // A button was pressed.
-        }
+//        if (CAPT_appHandler()) {
+//            // A button was pressed.
+//        }
 
         if (f_time_loop) {
-            leds_timestep();
+//            leds_timestep();
             // TODO: Poll for o_hai
             f_time_loop = 0;
         }
@@ -172,8 +180,9 @@ int main(void) {
             continue;
         }
 
-        CAPT_appSleep();
+//        CAPT_appSleep();
 
+        __bis_SR_register(LPM0_bits);
     } // End background loop
 }
 

@@ -54,7 +54,8 @@ uint8_t fun_base[] = {
         0x87,
         // B119 / BLANK
         // and 7 bits of global brightness correction:
-        0x7f,
+//        0x7f,
+        0x01,
         // HERE WE SWITCH TO 7-BIT SPI.
         // The following index is 18:
         0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F,
@@ -63,6 +64,8 @@ uint8_t fun_base[] = {
 
 /// Start an asynchronous send of the TLC5948S grayscale data.
 void tlc_set_gs() {
+    while (tlc_send_type != TLC_SEND_IDLE)
+        __no_operation(); // shouldn't ever actually have to block on this.
     if (tlc_send_type != TLC_SEND_IDLE)
         return;
     tlc_send_type = TLC_SEND_TYPE_GS;
@@ -111,7 +114,7 @@ void tlc_init() {
     ini.clockPhase = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
     ini.clockPolarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
     ini.clockSourceFrequency = 8000000;
-    ini.desiredSpiClock = 4000000;
+    ini.desiredSpiClock = 1000000;
     ini.msbFirst = EUSCI_B_SPI_MSB_FIRST;
     ini.selectClockSource = EUSCI_B_SPI_CLOCKSOURCE_SMCLK;
     ini.spiMode = EUSCI_B_SPI_3PIN;
