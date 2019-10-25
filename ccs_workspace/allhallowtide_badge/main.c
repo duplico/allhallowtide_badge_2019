@@ -67,30 +67,31 @@ void init_clocks() {
 void init_io() {
     // TODO:
     // USCIARMP=1
+    // USCIBRMP=0
 
     // GPIO:
     // P1.0     LAT         (SEL 00; DIR 1)
-    // P1.1     UCB0 SCLK   (SEL 01; DIR 0)
+    // P1.1     UCB0 SCLK   (SEL 01; DIR 1)
     // P1.2     UCB0SIMO    (SEL 01; DIR 0)
     // P1.3     MCLK/GSCLK  (SEL 10; DIR 1)
-    // P1.4     cap         (SEL 00; DIR 0)
-    // P1.5     ohai        (SEL 00; DIR 0) (pull-up)
-    // P1.6     cap         (SEL 00; DIR 0)
-    // P1.7     cap         (SEL 00; DIR 0)
-    P1DIR = 0b00001001;
+    // P1.4     loopback    (SEL 00; DIR 0)
+    // P1.5     cap         (SEL 00; DIR 0) // TODO: cap
+    // P1.6     unused      (SEL 00; DIR 0)
+    // P1.7     cap         (SEL 00; DIR 0) // TODO: cap
+    P1DIR = 0b00001011;
     P1SEL0 = 0b00000110; // LSB
     P1SEL1 = 0b00001000; // MSB
-    P1REN = 0b00100000;
-    P1OUT = 0b00100000;
-    // TODO: P2.2: SYNC (SET OUTPUT LOW UNLESS USED)
+    P1REN = 0x00;
+    P1OUT = 0x00;
+
     // P2.0     UCA0TXD     (SEL 01; DIR 1)
     // P2.1     UCA0RXD     (SEL 01; DIR 0)
-    // P2.2     unused      (SEL 00; DIR 0)
+    // P2.2     ohai        (SEL 00; DIR 0) (pull-up)
     P2DIR = 0b001;
     P2SEL0 = 0b011;
     P2SEL1 = 0b000;
-    P2REN = 0b000;
-    P2OUT = 0b000;
+    P2REN = 0b100;
+    P2OUT = 0b100;
 
     // Unlock the pins from high-impedance mode:
     // (AKA the MSP430FR magic make-it-work command)
@@ -156,10 +157,13 @@ int main(void) {
     while(1)
     {
         // Handle (or attempt to handle) and needed CapTIvate signals:
-        CAPT_appHandler();
+        if (CAPT_appHandler()) {
+            // A button was pressed.
+        }
 
         if (f_time_loop) {
             leds_timestep();
+            // TODO: Poll for o_hai
             f_time_loop = 0;
         }
 

@@ -102,11 +102,11 @@ void tlc_init() {
     tlc_stage_blank(1);
 
     // Configure the eUSCI.
-    UCB0CTLW0 |= UCSWRST;  // Shut down USCI_A0,
+    UCB0CTLW0 |= UCSWRST;  // Shut down USCI_B0,
 
     // TODO: Get rid of driverlib here if possible.
 
-    // And USCI_A0 peripheral:
+    // And USCI_B0 peripheral:
     EUSCI_B_SPI_initMasterParam ini = {0};
     ini.clockPhase = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
     ini.clockPolarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
@@ -141,7 +141,7 @@ __interrupt void EUSCI_B0_ISR(void)
     case 4: // Vector 4 - TXIFG : I just sent a byte.
         if (tlc_send_type == TLC_SEND_TYPE_GS) {
             if (tlc_tx_index == 32) { // done
-                P1OUT |= BIT4; P1OUT &= ~BIT4; // Pulse LAT
+                P1OUT |= BIT0; P1OUT &= ~BIT0; // Pulse LAT
                 tlc_send_type = TLC_SEND_IDLE;
                 break;
             } else { // gs - MSB first; this starts with 0.
