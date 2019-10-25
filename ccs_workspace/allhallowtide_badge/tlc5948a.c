@@ -54,7 +54,6 @@ uint8_t fun_base[] = {
         0x87,
         // B119 / BLANK
         // and 7 bits of global brightness correction:
-//        0x7f,
         0x01,
         // HERE WE SWITCH TO 7-BIT SPI.
         // The following index is 18:

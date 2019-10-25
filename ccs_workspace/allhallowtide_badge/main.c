@@ -10,8 +10,8 @@ volatile uint8_t f_time_loop;
 
 /// Initialize clock signals and the three system clocks.
 /**
- ** We'll take the DCO to 16 MHz, and divide it by 1 for MCLK.
- ** Then we'll divide MCLK by 8 to get 2 MHz SMCLK.
+ ** We'll take the DCO to 16 MHz, and divide it by 2 for MCLK.
+ ** Then we'll divide MCLK by 1 to get 8 MHz SMCLK.
  **
  ** Our available clock sources are:
  **  VLO:     10kHz very low power low-freq
@@ -39,9 +39,9 @@ void init_clocks() {
     CSCTL3 |= SELREF__REFOCLK;              // Set REFO as FLL reference source
     CSCTL0 = 0;                             // clear DCO and MOD registers
     CSCTL1 &= ~(DCORSEL_7);                 // Clear DCO frequency select bits first
-    CSCTL1 |= DCORSEL_3;                    // Set DCO = 8MHz
+    CSCTL1 |= DCORSEL_5;                    // Set DCO = 16MHz
     // CSCTL feedback loop:
-    CSCTL2 = FLLD_0 + 243;                  // DCODIV = /1
+    CSCTL2 = FLLD_0 + 487;                  // DCODIV = /1
 
     __delay_cycles(3);
     __bic_SR_register(SCG0);                // enable FLL
@@ -52,7 +52,7 @@ void init_clocks() {
 
     // MCLK (8 MHz)
     //  All sources but MODOSC are available at up to /128
-    //  Set to DCO/1 = 8 MHz
+    //  Set to DCO/2 = 8 MHz
     // DIVM__1;
 
     // SMCLK (8 MHz)
@@ -125,7 +125,7 @@ int main(void) {
 
     WDTCTL = WDTPW | WDTHOLD;
 
-//    init_clocks();
+    init_clocks();
     init_io();
 
     __bis_SR_register(GIE);
@@ -152,7 +152,7 @@ int main(void) {
 
     tlc_stage_blank(0);
     for (uint8_t i=0; i<16; i++) {
-        tlc_gs[i] = 0x0fff;
+        tlc_gs[i] = 0x0010;
     }
 
     tlc_set_fun();
@@ -174,15 +174,13 @@ int main(void) {
             // TODO: Poll for o_hai
             f_time_loop = 0;
         }
-
-        // TODO: Determine if this is needed:
-        if (f_time_loop) {
-            continue;
-        }
-
 //        CAPT_appSleep();
 
-        __bis_SR_register(LPM0_bits);
+        // Against all my instincts, we CANNOT use a low power mode here.
+        //  This is because the only clock signal I had available for the GSCLK
+        //  for the LED driver was the pin for MCLK. So, I can't turn off the
+        //  CPU clock, or the LEDs will turn off. Or at least stay at their
+        //  current brightness. Lol.
     } // End background loop
 }
 
