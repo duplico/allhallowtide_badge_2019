@@ -21,21 +21,21 @@
  *  gs[3] is the leftmost, and gs[4] is the HEART!
  */
 
-const rgbcolor_t band_off[BAND_LED_COUNT] = {
+const rgbcolor16_t band_off[BAND_LED_COUNT] = {
         {0, 0, 0},
         {0, 0, 0},
         {0, 0, 0},
         {0, 0, 0},
 };
 
-rgbcolor_t band_colors_curr[BAND_LED_COUNT] = {
+rgbcolor16_t band_colors_curr[BAND_LED_COUNT] = {
         {0, 0, 0},
         {0, 0, 0},
         {0, 0, 0},
         {0, 0, 0},
 };
 
-rgbcolor_t band_colors_next[BAND_LED_COUNT] = {
+rgbcolor16_t band_colors_next[BAND_LED_COUNT] = {
         {0, 0, 0},
         {0, 0, 0},
         {0, 0, 0},
@@ -107,7 +107,12 @@ void band_load_colors() {
     // leg_colors_curr <- tentacle_current_anim[tentacle_anim_index]
 
     // Stage in the current color:
-    memcpy(band_colors_curr, band_current_anim->colors[band_anim_frame], sizeof(rgbcolor_t)*BAND_LED_COUNT);
+//    memcpy(band_colors_curr, band_current_anim->colors[band_anim_frame], sizeof(rgbcolor_t)*BAND_LED_COUNT); // TODO
+    for (uint8_t i=0; i<BAND_LED_COUNT; i++) {
+        band_colors_curr[i].red = band_current_anim->colors[band_anim_frame][i].red * 5;
+        band_colors_curr[i].green = band_current_anim->colors[band_anim_frame][i].green * 5;
+        band_colors_curr[i].blue = band_current_anim->colors[band_anim_frame][i].blue * 5;
+    }
 
     // Stage in the next color:
     // If we're looping, it's modded. If not looping, back to black.
@@ -116,9 +121,16 @@ void band_load_colors() {
         // color will be OFF.
         memcpy(band_colors_next, band_off, sizeof(rgbcolor_t)*BAND_LED_COUNT);
     } else {
-        // We're either looping or not at the end, so it's probably safe to skip this:
+        // We're either looping or not at the end.
         uint8_t next_id = (band_anim_frame+1) % band_current_anim->len;
-        memcpy(band_colors_next, band_current_anim->colors[next_id], sizeof(rgbcolor_t)*BAND_LED_COUNT);
+//        memcpy(band_colors_next, band_current_anim->colors[next_id], sizeof(rgbcolor_t)*BAND_LED_COUNT); // TODO
+
+        for (uint8_t i=0; i<BAND_LED_COUNT; i++) {
+            band_colors_next[i].red = band_current_anim->colors[next_id][i].red * 5;
+            band_colors_next[i].green = band_current_anim->colors[next_id][i].green * 5;
+            band_colors_next[i].blue = band_current_anim->colors[next_id][i].blue * 5;
+        }
+
     }
 
     // Stage in the step color:
@@ -173,7 +185,7 @@ inline void band_fade_colors() {
 /**
  ** This also handles special cases, like twinkling.
  **/
-void set_band_gs(const rgbcolor_t* band_colors) {
+void set_band_gs(const rgbcolor16_t* band_colors) {
     static uint_fast32_t r = 0;
     static uint_fast32_t g = 0;
     static uint_fast32_t b = 0;
@@ -345,7 +357,7 @@ void leds_timestep() {
     switch(band_current_anim->anim_type) {
     case ANIM_TYPE_FASTTWINKLE:
         band_anim_adjustment_index++;
-        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_FAST) {
+        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_FAST/LED_DUR_LOOPS) {
             band_twinkle_bits = rand() % 256;
             band_anim_adjustment_index = 0;
             band_dirty = 1;
@@ -353,7 +365,7 @@ void leds_timestep() {
         break;
     case ANIM_TYPE_SLOWTWINKLE:
         band_anim_adjustment_index++;
-        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_SLOW) {
+        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_SLOW/LED_DUR_LOOPS) {
             band_twinkle_bits = rand() % 256;
             band_anim_adjustment_index = 0;
             band_dirty = 1;
@@ -361,7 +373,7 @@ void leds_timestep() {
         break;
     case ANIM_TYPE_HARDTWINKLE:
         band_anim_adjustment_index++;
-        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_HARD) {
+        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_HARD/LED_DUR_LOOPS) {
             band_twinkle_bits = rand() % 256;
             band_anim_adjustment_index = 0;
             band_dirty = 1;

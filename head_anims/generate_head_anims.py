@@ -2,10 +2,10 @@ import sys, os, string
 
 import webcolors
 
-COLOR_SCALE_FACTOR = 5.0
+COLOR_SCALE_FACTOR = 1.0
 
 color_corrections = {
-    "default" : (40*3.0/COLOR_SCALE_FACTOR,240*3.0/COLOR_SCALE_FACTOR,178*3.0/COLOR_SCALE_FACTOR),
+    "default" : (40,240,178),
     "white" : (255,128,255),
     "off" : (0,0,0),
     "pink" : (240, 20, 60),
@@ -70,7 +70,7 @@ def main():
         with open(anim) as f:
             local_colors = dict()
             
-            lines = [line.strip() for line in f if line.strip() and (line[0] != "#" or "CAMO" in line.upper() or "SINGLE" in line.upper() or "INK" in line.upper() or "DOUBLE" in line.upper())]
+            lines = [line.strip() for line in f if line.strip() and (line[0] != "#" or "BAND" in line.upper() or "SINGLE" in line.upper() or "INK" in line.upper() or "DOUBLE" in line.upper())]
             line_no = 0
             
             # Consume all of the colors in this
@@ -88,115 +88,78 @@ def main():
                 line_no += 1
             
             camo_line = ""
-            ink_line = ""
-            doubleink_line = ""
-            wiggles = []
-            anim_types = []
-            
-            assert "SPRAY" in lines[line_no].upper()
-            if anim_name.upper().startswith('META'):
-                meta_spray_colors.append(local_colors[color_lookups[lines[line_no].split()[1]]])
-            else:
-                all_spray_colors.append(local_colors[color_lookups[lines[line_no].split()[1]]])
+
+            assert "BAND" in lines[line_no].upper()
             line_no += 1
-            
-            assert "CAMO" in lines[line_no].upper()
-            line_no += 1
-            
-            if "WIGGLE" in lines[line_no].upper():
-                wiggles.append(1)
-                line_no += 1
-            else:
-                wiggles.append(0)
                 
             local_type = lines[line_no]
             assert local_type[0] not in string.digits
             if local_type not in all_types: all_types.append(local_type)
-            anim_types.append(local_type)
             line_no += 1
             
-            while lines[line_no][0] in string.digits:
-                # Consume the animation. Ignore white space
-                camo_line += lines[line_no]
-                line_no += 1
-            
+            try:
+                while lines[line_no][0] in string.digits:
+                    # Consume the animation. Ignore white space
+                    camo_line += lines[line_no]
+                    line_no += 1
+            except IndexError:
+                pass
+
             if camo_line[-1] == ',':
                 camo_line = camo_line[:-1]
             camo = list(map(lambda s: int(s.strip()), camo_line.split(',')))
-            camo_frames = [camo[i:i+10] for i in range(0, len(camo), 10)]
-            
-            assert "SINGLE" in lines[line_no].upper() or "INK" in lines[line_no].upper()
-            line_no += 1
-            
-            if "WIGGLE" in lines[line_no].upper():
-                wiggles.append(1)
-                line_no += 1
-            else:
-                wiggles.append(0)
-                
-            local_type = lines[line_no]
-            assert local_type[0] not in string.digits
-            if local_type not in all_types: all_types.append(local_type)
-            anim_types.append(local_type)
-            line_no += 1
-            
-            while lines[line_no][0] in string.digits:
-                # Consume the animation. Ignore white space
-                ink_line += lines[line_no]
-                line_no += 1            
+            camo_frames = [camo[i:i+6] for i in range(0, len(camo), 6)]   
             
             # Great. Now we've ingested the entire file.
             # Time to start generating frames.
             
             local_animation_names = []
+
+
+            c_lines.append("// frames for the band:")
+            c_lines.append("const rgbcolor_t %s_band_frames[][4] = {" % anim_name)
+            h_lines.append("// frames for the band:")
+            h_lines.append("extern const rgbcolor_t %s_band_frames[][4];" % anim_name)
             
-            for l, lname, atype, wiggle in ((camo_frames, 'camo', anim_types[0], wiggles[0]), ):
-                if anim_name.startswith("zflag") and lname == 'boop': break
-                c_lines.append("// frames for %s" % lname)
-                c_lines.append("const rgbcolor_t %s_%s_frames[][4] = {" % (anim_name, lname))
-                h_lines.append("// frames for %s" % lname)
-                h_lines.append("extern const rgbcolor_t %s_%s_frames[][4];" % (anim_name, lname))
-                
-                # Flags are all the same.
-                if anim_name.startswith("zflag"):
-                    local_animation_names += ["%s_%s" % (anim_name, lname)]*3
-                else:
-                    local_animation_names += ["%s_%s" % (anim_name, lname)]
-                
-                metadata1 = []
-                metadata2 = []
-                total_duration = 0
-                for f in l:
-                    metadata1 += [str(f[8])]
-                    metadata2 += [str(f[9])]
-                    total_duration += int(f[8]) + int(f[9])
-                    try:
-                        fr = list(map(lambda a: local_colors[a], f[:4]))
-                    except:
-                        print('Error on frame: ', f)
-                        exit(1)
-                    fr = fr[::-1]
-                    c_lines.append("    {%s}," % ', '.join(map(lambda rgb: "{0x%x, 0x%x, 0x%x}" % tuple(map(int, rgb)), fr)))
-                
-                if total_duration > BOOP_LEN:
-                    boop_loops = 0
-                else:
-                    boop_loops = BOOP_LEN / total_duration
-                
-                c_lines.append("};")
-                c_lines.append("uint16_t %s_%s_durations[] = {%s};" % (anim_name, lname, ', '.join(metadata1)))
-                c_lines.append("uint16_t %s_%s_fade_durs[] = {%s};" % (anim_name, lname, ', '.join(metadata2)))
-                
-                h_lines.append("extern uint16_t %s_%s_durations[];" % (anim_name, lname))
-                h_lines.append("extern uint16_t %s_%s_fade_durs[];" % (anim_name, lname))
-                
-                c_lines.append("// the animation:")
-                c_lines.append("const band_animation_t %s_%s = {%s_%s_frames, %s_%s_durations, %s_%s_fade_durs, %d, ANIM_TYPE_%s, %d, %d};" % (anim_name, lname, anim_name, lname, anim_name, lname, anim_name, lname, len(l), atype.upper(), wiggle, boop_loops))
-                
-                h_lines.append("extern const band_animation_t %s_%s;" % (anim_name, lname))
+            # Flags are all the same.
+            local_animation_names += ["%s_band" % anim_name]
+            
+            metadata1 = []
+            metadata2 = []
+            total_duration = 0
+            for f in camo_frames:
+                metadata1 += [str(f[4])]
+                metadata2 += [str(f[5])]
+                total_duration += int(f[4]) + int(f[5])
+                try:
+                    fr = list(map(lambda a: local_colors[a], f[:4]))
+                except:
+                    print('Error on frame: ', f)
+                    exit(1)
+                fr = fr[::-1]
+                c_lines.append("    {%s}," % ', '.join(map(lambda rgb: "{0x%x, 0x%x, 0x%x}" % tuple(map(int, rgb)), fr)))
+            
+            if total_duration > BOOP_LEN:
+                boop_loops = 0
+            else:
+                boop_loops = BOOP_LEN / total_duration
+            
+            c_lines.append("};")
+            c_lines.append("uint16_t %s_band_durations[] = {%s};" % (anim_name, ', '.join(metadata1)))
+            c_lines.append("uint16_t %s_band_fade_durs[] = {%s};" % (anim_name, ', '.join(metadata2)))
+            
+            h_lines.append("extern uint16_t %s_band_durations[];" % anim_name)
+            h_lines.append("extern uint16_t %s_band_fade_durs[];" % anim_name)
+            
+            c_lines.append("// the animation:")
+            c_lines.append("const band_animation_t %s_band = {%s_band_frames, %s_band_durations, %s_band_fade_durs, %d, ANIM_TYPE_%s, %d};" % (anim_name, anim_name, anim_name, anim_name, len(camo_frames), local_type.upper(), boop_loops))
+            
+            h_lines.append("extern const band_animation_t %s_band;" % anim_name)
+
             c_lines.append("")
-            h_lines.append("extern const band_animation_t *%s_anim_set[3];" % anim_name)
-            c_lines.append("const band_animation_t *%s_anim_set[3] = {%s};" % (anim_name, ', '.join(map(lambda a: "&%s" % a, local_animation_names))))
+            h_lines.append("extern const band_animation_t *%s_anim_set[1];" % anim_name)
+            c_lines.append("const band_animation_t *%s_anim_set[1] = {%s};" % (anim_name, ', '.join(map(lambda a: "&%s" % a, local_animation_names))))
+
     c_lines.append("")
     h_lines.append("#define HEAD_ANIM_COUNT %d" % len(all_animations))
     h_lines.append("#define HEAD_ANIM_COUNT_INCL_META %d" % len(all_animations+meta_animations))

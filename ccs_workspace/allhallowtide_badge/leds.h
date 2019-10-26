@@ -14,14 +14,23 @@
 
 // TODO: This needs something like the LED_DUR_LOOPS from the old way:
 
-#define BAND_TWINKLE_STEPS_FAST 50
+#define LED_DUR_LOOPS 14
+
+#define BAND_TWINKLE_STEPS_FAST 100
 #define BAND_TWINKLE_STEPS_SLOW 400
-#define BAND_TWINKLE_STEPS_HARD 40
+#define BAND_TWINKLE_STEPS_HARD 14
 
 typedef struct {
     uint16_t red;
     uint16_t green;
     uint16_t blue;
+} rgbcolor16_t;
+
+
+typedef struct {
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
 } rgbcolor_t;
 
 typedef struct {
@@ -36,7 +45,6 @@ typedef struct {
     const uint16_t *fade_durs;
     uint8_t len;
     uint8_t anim_type;
-    uint8_t wiggle;
     uint8_t boop_loops;
 } band_animation_t;
 
