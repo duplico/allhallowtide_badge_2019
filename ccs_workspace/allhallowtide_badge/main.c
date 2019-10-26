@@ -33,7 +33,7 @@ void init_clocks() {
 
     // TODO:
     // Configure FRAM wait state (set to 1 to support 16MHz MCLK)
-//    FRAMCtl_configureWaitStateControl(FRAMCTL_ACCESS_TIME_CYCLES_1);
+    FRAMCtl_configureWaitStateControl(FRAMCTL_ACCESS_TIME_CYCLES_1);
 
     __bis_SR_register(SCG0);                // disable FLL
     CSCTL3 |= SELREF__REFOCLK;              // Set REFO as FLL reference source
@@ -60,7 +60,7 @@ void init_clocks() {
     //  Set to MCLK/1 = 8 MHz
     // DIVS__1;
 
-    CSCTL5 = VLOAUTOOFF_1 | DIVS__1 | DIVM__1;
+    CSCTL5 = VLOAUTOOFF_1 | DIVS__2 | DIVM__1;
 }
 
 /// Apply the initial configuration of the GPIO and peripheral pins.
@@ -83,7 +83,8 @@ void init_io() {
     // P1.7     cap         (SEL 00; DIR 0) // TODO: cap
     P1DIR = 0b00001011;
     P1SEL0 = 0b00000110; // LSB
-    P1SEL1 = 0b00001000; // MSB
+//    P1SEL1 = 0b00001000; // MSB - GSCLK enabled
+    P1SEL1 = 0b00000000; // MSB - GSCLK disabled (GPIO output instead)
     P1REN = 0x00;
     P1OUT = 0x00;
 
@@ -141,7 +142,7 @@ int main(void) {
     Timer_A_initUpModeParam next_channel_timer_init = {};
     next_channel_timer_init.clockSource = TIMER_A_CLOCKSOURCE_ACLK;
     next_channel_timer_init.clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_64;
-    next_channel_timer_init.timerPeriod = 2;
+    next_channel_timer_init.timerPeriod = 8;
     next_channel_timer_init.timerInterruptEnable_TAIE = TIMER_A_TAIE_INTERRUPT_DISABLE;
     next_channel_timer_init.captureCompareInterruptEnable_CCR0_CCIE = TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE;
     next_channel_timer_init.timerClear = TIMER_A_SKIP_CLEAR;
@@ -150,9 +151,32 @@ int main(void) {
     Timer_A_initUpMode(TIMER_A0_BASE, &next_channel_timer_init);
     Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
 
+    next_channel_timer_init.clockSource = TIMER_A_CLOCKSOURCE_SMCLK;
+    next_channel_timer_init.clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_8;
+    next_channel_timer_init.timerPeriod = 1;
+    next_channel_timer_init.timerInterruptEnable_TAIE = TIMER_A_TAIE_INTERRUPT_DISABLE;
+    next_channel_timer_init.captureCompareInterruptEnable_CCR0_CCIE = TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE;
+    next_channel_timer_init.timerClear = TIMER_A_SKIP_CLEAR;
+    next_channel_timer_init.startTimer = false;
+
+    if (!(P1SEL1 & BIT3)) {
+        Timer_A_initUpMode(TIMER_A1_BASE, &next_channel_timer_init);
+        Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
+    }
+
     tlc_stage_blank(0);
-    for (uint8_t i=0; i<16; i++) {
-        tlc_gs[i] = 0x0010;
+    for (uint8_t i=1; i<16; i++) {
+        switch((i-1) % 3) {
+        case 0:
+            tlc_gs[i] = 0x0010;
+            break;
+        case 1:
+            tlc_gs[i] = 0x0010;
+            break;
+        case 2:
+            tlc_gs[i] = 0x0010;
+            break;
+        }
     }
 
     tlc_set_fun();
@@ -160,14 +184,14 @@ int main(void) {
     tlc_set_fun();
 
 
-//    CAPT_appStart();
+    CAPT_appStart();
 
     while(1)
     {
         // Handle (or attempt to handle) and needed CapTIvate signals:
-//        if (CAPT_appHandler()) {
-//            // A button was pressed.
-//        }
+        if (CAPT_appHandler()) {
+            // A button was pressed.
+        }
 
         if (f_time_loop) {
 //            leds_timestep();
@@ -196,4 +220,11 @@ __interrupt void TIMER0_A0_ISR_HOOK(void)
 {
     f_time_loop = 1;
     __bic_SR_register_on_exit(LPM0_bits);
+}
+
+// Dedicated ISR for CCR0. Vector is cleared on service.
+#pragma vector=TIMER1_A0_VECTOR
+__attribute__((ramfunc))__interrupt void TIMER1_A0_ISR_HOOK(void)
+{
+    P1OUT ^= BIT3;
 }
