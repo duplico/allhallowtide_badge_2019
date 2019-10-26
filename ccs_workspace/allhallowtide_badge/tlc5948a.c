@@ -127,8 +127,9 @@ void tlc_init() {
     UCB0CTLW0 &= ~UC7BIT;  //  put it in 8-bit mode out of caution.
     UCB0CTLW0 &= ~UCSWRST; //  and enable it.
 
-    EUSCI_B_SPI_clearInterrupt(EUSCI_B0_BASE, EUSCI_B_SPI_TRANSMIT_INTERRUPT);
-    EUSCI_B_SPI_enableInterrupt(EUSCI_B0_BASE, EUSCI_B_SPI_TRANSMIT_INTERRUPT);
+    // Clear and enable UCB0 TX interrupt
+    UCB0IFG &= ~UCTXIFG;
+    UCB0IE |= UCTXIE;
 
     tlc_set_fun();
     tlc_set_gs();
@@ -160,22 +161,20 @@ __interrupt void EUSCI_B0_ISR(void)
                 UCB0CTLW0 |= UCSWRST;
                 UCB0CTLW0 |= UC7BIT;
                 UCB0CTLW0 &= ~UCSWRST;
-                EUSCI_B_SPI_clearInterrupt(EUSCI_B0_BASE, EUSCI_A_SPI_TRANSMIT_INTERRUPT);
-                EUSCI_B_SPI_enableInterrupt(EUSCI_B0_BASE, EUSCI_A_SPI_TRANSMIT_INTERRUPT);
+                UCB0IFG &= ~UCTXIFG;
+                UCB0IE |= UCTXIE;
             } else if (tlc_tx_index == 34) {
-                // LATCH!
-                P1OUT |= BIT0;
-                P1OUT &= ~BIT0;
+                P1OUT |= BIT0; P1OUT &= ~BIT0; // Pulse LAT
 
                 UCB0CTLW0 |= UCSWRST;
                 UCB0CTLW0 &= ~UC7BIT;
                 UCB0CTLW0 &= ~UCSWRST;
-                EUSCI_B_SPI_clearInterrupt(EUSCI_B0_BASE, EUSCI_B_SPI_TRANSMIT_INTERRUPT);
-                EUSCI_B_SPI_enableInterrupt(EUSCI_B0_BASE, EUSCI_B_SPI_TRANSMIT_INTERRUPT);
+                UCB0IFG &= ~UCTXIFG;
+                UCB0IE |= UCTXIE;
                 tlc_send_type = TLC_SEND_IDLE;
                 return;
             }
-            EUSCI_B_SPI_transmitData(EUSCI_B0_BASE, fun_base[tlc_tx_index]);
+            UCB0TXBUF = fun_base[tlc_tx_index];
             tlc_tx_index++;
         } else {
             tlc_send_type = TLC_SEND_IDLE; // probably shouldn't reach.
