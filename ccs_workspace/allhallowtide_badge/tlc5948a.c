@@ -23,11 +23,11 @@
 #define TLC_THISISFUN   0x01
 
 // Current TLC sending state:
-uint8_t tlc_send_type = TLC_SEND_IDLE;
-uint8_t tlc_tx_index = 0;   // Index of the current byte in the TX buffer
+uint8_t tlc_send_type;
+uint8_t tlc_tx_index;   // Index of the current byte in the TX buffer
 
 // Let's make these 12-bit. So the most significant hexadigit will be brightness-correct.
-uint16_t tlc_gs[16] = {0, };
+uint16_t tlc_gs[16];
 
 // This is the basic set of function data.
 // A few of them can be edited.
@@ -137,20 +137,14 @@ void tlc_init() {
 #pragma vector=USCI_B0_VECTOR
 __interrupt void EUSCI_B0_ISR(void)
 {
-    switch (__even_in_range(UCB0IV, 4)) {
-    //Vector 2 - RXIFG
-    case 2:
-        // We received some garbage sent to us while we were sending.
-        // TODO:
-        EUSCI_B_SPI_receiveData(EUSCI_B0_BASE); // Throw it away.
-        break; // End of RXIFG ///////////////////////////////////////////////////////
+    // TX is the only interrupt turned on?
+    if (UCB0IV & 0x04) {
 
-    case 4: // Vector 4 - TXIFG : I just sent a byte.
         if (tlc_send_type == TLC_SEND_TYPE_GS) {
             if (tlc_tx_index == 32) { // done
                 P1OUT |= BIT0; P1OUT &= ~BIT0; // Pulse LAT
                 tlc_send_type = TLC_SEND_IDLE;
-                break;
+                return;
             } else { // gs - MSB first; this starts with 0.
                 volatile static uint16_t channel_gs = 0;
                 channel_gs = tlc_gs[tlc_tx_index / 2]; // Divide by 2 because these are uint16
@@ -179,14 +173,12 @@ __interrupt void EUSCI_B0_ISR(void)
                 EUSCI_B_SPI_clearInterrupt(EUSCI_B0_BASE, EUSCI_B_SPI_TRANSMIT_INTERRUPT);
                 EUSCI_B_SPI_enableInterrupt(EUSCI_B0_BASE, EUSCI_B_SPI_TRANSMIT_INTERRUPT);
                 tlc_send_type = TLC_SEND_IDLE;
-                break;
+                return;
             }
             EUSCI_B_SPI_transmitData(EUSCI_B0_BASE, fun_base[tlc_tx_index]);
             tlc_tx_index++;
         } else {
             tlc_send_type = TLC_SEND_IDLE; // probably shouldn't reach.
         }
-        break; // End of TXIFG /////////////////////////////////////////////////////
-    default: break;
-    } // End of ISR flag switch ////////////////////////////////////////////////////
+    }
 }

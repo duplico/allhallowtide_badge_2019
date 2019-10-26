@@ -117,6 +117,7 @@ void CAPT_appStart(void)
     MAP_CAPT_startTimer();
     MAP_CAPT_enableISR(CAPT_TIMER_INTERRUPT);
 
+
 #ifdef CAPT_WOP_VLO_LPM4
     g_ui8SavedAppLPM  = g_uiApp.ui8AppLPM;
 #endif  // CAPT_WOP_VLO_LPM4

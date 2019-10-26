@@ -11,10 +11,7 @@
 #include <stdint.h>
 
 #define BAND_LED_COUNT 4
-
-// TODO: This needs something like the LED_DUR_LOOPS from the old way:
-
-#define LED_DUR_LOOPS 14
+#define LEGS_DUR_STEP 14
 
 #define BAND_TWINKLE_STEPS_FAST 100
 #define BAND_TWINKLE_STEPS_SLOW 400

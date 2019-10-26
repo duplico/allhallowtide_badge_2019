@@ -3,10 +3,8 @@
 
 #include "tlc5948a.h"
 
-#include "CAPT_App.h"
-#include "CAPT_Type.h"
-#include "CAPT_Touch.h"
-#include "rom_map_captivate.h"
+#include "captivate.h"
+
 #include "leds.h"
 
 volatile uint8_t f_time_loop;
@@ -193,17 +191,30 @@ int main(void) {
     tlc_stage_blank(0);
     tlc_set_fun();
 
-    CAPT_appStart();
-
+    CAPT_initUI(&g_uiApp);
+    CAPT_calibrateUI(&g_uiApp);
+    g_uiApp.ui8AppLPM = 0; // No LPM, keep MCLK on.
     MAP_CAPT_registerCallback(&BTN1_BOOP, &boop_cb);
     MAP_CAPT_registerCallback(&BTN3_EYE, &eye_cb);
+    MAP_CAPT_selectTimerSource(CAPT_TIMER_SRC_ACLK);
+    MAP_CAPT_writeTimerCompRegister(CAPT_MS_TO_CYCLES(g_uiApp.ui16ActiveModeScanPeriod));
+    MAP_CAPT_startTimer();
+    MAP_CAPT_enableISR(CAPT_TIMER_INTERRUPT);
+
 
     band_start_anim_by_id(anim_id, 0, 0, 1);
 
     while(1)
     {
-        // Handle (or attempt to handle) and needed CapTIvate signals:
-        CAPT_appHandler();
+        if (g_bConvTimerFlag == true)
+        {
+            //
+            // If it is time to update the button,
+            // update it here with the generic library call.
+            //
+            g_bConvTimerFlag = false;
+            CAPT_updateUI(&g_uiApp);
+        }
 
         if (f_time_loop) {
             leds_timestep();
@@ -218,12 +229,6 @@ int main(void) {
         //  CPU clock, or the LEDs will turn off. Or at least stay at their
         //  current brightness. Lol.
     } // End background loop
-}
-
-int _system_pre_init(void)
-{
-    WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-    return 1;
 }
 
 // Dedicated ISR for CCR0. Vector is cleared on service.

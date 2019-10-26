@@ -64,39 +64,26 @@ rgbdelta_t heart_color_step;
 // TODO: use:
 uint8_t heart_state;
 
-uint8_t band_anim_frame = 0;
-uint8_t band_anim_id = 0;
-uint8_t band_anim_type = 0;
-uint8_t band_saved_anim_id = 0;
-uint8_t band_saved_anim_type = 0;
+uint8_t band_anim_frame;
+uint8_t band_anim_id;
+uint8_t band_anim_type;
+uint8_t band_saved_anim_id;
+uint8_t band_saved_anim_type;
 uint8_t band_is_ambient = 1;
-uint8_t band_anim_looping = 0;
-uint8_t band_anim_length = 0;
-uint16_t band_hold_steps = 0;
-uint16_t band_hold_index = 0;
-uint16_t band_transition_steps = 0;
-uint16_t band_transition_index = 0;
+uint8_t band_anim_looping;
+uint8_t band_anim_length;
+uint16_t band_hold_steps;
+uint16_t band_hold_index;
+uint16_t band_transition_steps;
+uint16_t band_transition_index;
 const band_animation_t *band_current_anim;
 
-uint8_t wiggle_mask = 0xff;
-
 // TODO: Use this to configure the brightness:
-uint8_t current_ambient_correct = 0;
-uint8_t previous_ambient_correct = 0;
+uint8_t current_ambient_correct;
+uint8_t previous_ambient_correct;
 
 uint8_t band_twinkle_bits = 0xea;
 uint16_t band_anim_adjustment_index = 0;
-
-// See https://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious
-inline uint8_t log2(uint16_t v) {
-    int8_t r = 0; // r will be lg(v)
-    while (v >>= 1)
-    {
-        r++;
-    }
-
-    return r;
-}
 
 void set_heart() {
 
@@ -112,30 +99,21 @@ void band_load_colors() {
         band_colors_curr[i].red = band_current_anim->colors[band_anim_frame][i].red * 5;
         band_colors_curr[i].green = band_current_anim->colors[band_anim_frame][i].green * 5;
         band_colors_curr[i].blue = band_current_anim->colors[band_anim_frame][i].blue * 5;
-    }
 
-    // Stage in the next color:
-    // If we're looping, it's modded. If not looping, back to black.
-    if (band_anim_frame == band_current_anim->len-1 && !(band_anim_looping || band_is_ambient)) { // last frame:
-        // We're at the last frame, and we are NOT looping. So our NEXT
-        // color will be OFF.
-        memcpy(band_colors_next, band_off, sizeof(rgbcolor_t)*BAND_LED_COUNT);
-    } else {
-        // We're either looping or not at the end.
-        uint8_t next_id = (band_anim_frame+1) % band_current_anim->len;
-//        memcpy(band_colors_next, band_current_anim->colors[next_id], sizeof(rgbcolor_t)*BAND_LED_COUNT); // TODO
 
-        for (uint8_t i=0; i<BAND_LED_COUNT; i++) {
+        // Stage in the next color:
+        // If we're looping, it's modded. If not looping, back to black.
+        if (band_anim_frame == band_current_anim->len-1 && !(band_anim_looping || band_is_ambient)) {
+            band_colors_next[i].red = 0;
+            band_colors_next[i].green = 0;
+            band_colors_next[i].blue = 0;
+        } else {
+            uint8_t next_id = (band_anim_frame+1) % band_current_anim->len;
             band_colors_next[i].red = band_current_anim->colors[next_id][i].red * 5;
             band_colors_next[i].green = band_current_anim->colors[next_id][i].green * 5;
             band_colors_next[i].blue = band_current_anim->colors[next_id][i].blue * 5;
         }
 
-    }
-
-    // Stage in the step color:
-    for (uint8_t i = 0; i < BAND_LED_COUNT; i++)
-    {
         band_colors_step[i].red = ((int_fast32_t) band_colors_next[i].red - band_colors_curr[i].red) / band_transition_steps;
         band_colors_step[i].green = ((int_fast32_t) band_colors_next[i].green - band_colors_curr[i].green) / band_transition_steps;
         band_colors_step[i].blue = ((int_fast32_t) band_colors_next[i].blue - band_colors_curr[i].blue) / band_transition_steps;
@@ -196,19 +174,6 @@ void set_band_gs(const rgbcolor16_t* band_colors) {
         g = band_colors[flower_index].green << 1;
         b = band_colors[flower_index].blue << 1;
 
-        // TODO: Determine what the equivalent of wiggling is, if any:
-//        // If it's <3 (meaning lower) and masked out by wiggling,
-//        if (flower_index < 4 && !(wiggle_mask & (1 << flower_index))) {
-//            // turn it off.
-//            r=0;
-//            g=0;
-//            b=0;
-//        } else if (flower_index >=4 && !(wiggle_mask & (1 << (flower_index-4)))) {
-//            r = leg_colors[flower_index-4].red;
-//            g = leg_colors[flower_index-4].green;
-//            b = leg_colors[flower_index-4].blue;
-//        }
-
         // Handle the particulars of the animation's
         //  sub-type. (twinkling, etc.)
         switch(band_current_anim->anim_type) {
@@ -224,13 +189,6 @@ void set_band_gs(const rgbcolor16_t* band_colors) {
                 r = r >> 2;
                 g = g >> 2;
                 b = b >> 2;
-            }
-            break;
-        case ANIM_TYPE_HARDTWINKLE:
-            if (band_twinkle_bits & (1 << flower_index)) {
-                r = 0;
-                g = 0;
-                b = 0;
             }
             break;
         default:
@@ -254,16 +212,13 @@ void set_band_gs(const rgbcolor16_t* band_colors) {
 
 void band_set_steps_and_go() {
     // TODO: Modify this as appropriate:
-    band_hold_steps = band_current_anim->durations[band_anim_frame] / 13; // / LEGS_DUR_STEP;
+    band_hold_steps = band_current_anim->durations[band_anim_frame] / LEGS_DUR_STEP;
     band_hold_index = 0;
     // TODO: And this:
-    band_transition_steps = band_current_anim->fade_durs[band_anim_frame] / 13; // / LEGS_DUR_STEP;
+    band_transition_steps = band_current_anim->fade_durs[band_anim_frame] / LEGS_DUR_STEP;
     band_transition_index = 0;
 
     band_load_colors();
-
-    // TODO: Is this double-called, due to the "dirty" logic?
-    set_band_gs(band_current_anim->colors[band_anim_frame]);
 }
 
 /// Launch a new headband animation, possibly as the new ambient one.
@@ -288,14 +243,13 @@ void band_start_anim_by_struct(const band_animation_t *animation, uint8_t loop, 
     band_animation_state = 1; // animating
 
     band_anim_adjustment_index = 0;
-    // TODO: Can we have a non-looping non-ambient? Are those the same?
+
     band_anim_looping = loop;
     band_anim_length = band_current_anim->len;
 
-    // TODO: What to do with this?
-    wiggle_mask = 0xff;
-
     band_set_steps_and_go();
+    set_band_gs(band_colors_curr);
+    // TODO: Need to set it dirty.
 }
 
 void band_start_anim_by_id(uint8_t anim_id, uint8_t anim_type, uint8_t loop, uint8_t ambient) {
@@ -354,34 +308,18 @@ void leds_timestep() {
 
     // Handle the band:
     //  Apply our current delta animation timestep.
-    switch(band_current_anim->anim_type) {
-    case ANIM_TYPE_FASTTWINKLE:
-        band_anim_adjustment_index++;
-        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_FAST/LED_DUR_LOOPS) {
+    if (band_current_anim->anim_type != ANIM_TYPE_SOLID) {
+        uint16_t target_index;
+        if (band_current_anim->anim_type == ANIM_TYPE_FASTTWINKLE)
+            target_index = BAND_TWINKLE_STEPS_FAST/LEGS_DUR_STEP;
+        else
+            target_index = BAND_TWINKLE_STEPS_SLOW/LEGS_DUR_STEP;
+
+        if (band_anim_adjustment_index == target_index) {
             band_twinkle_bits = rand() % 256;
             band_anim_adjustment_index = 0;
             band_dirty = 1;
         }
-        break;
-    case ANIM_TYPE_SLOWTWINKLE:
-        band_anim_adjustment_index++;
-        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_SLOW/LED_DUR_LOOPS) {
-            band_twinkle_bits = rand() % 256;
-            band_anim_adjustment_index = 0;
-            band_dirty = 1;
-        }
-        break;
-    case ANIM_TYPE_HARDTWINKLE:
-        band_anim_adjustment_index++;
-        if (band_anim_adjustment_index == BAND_TWINKLE_STEPS_HARD/LED_DUR_LOOPS) {
-            band_twinkle_bits = rand() % 256;
-            band_anim_adjustment_index = 0;
-            band_dirty = 1;
-        }
-        break;
-    default:
-        // SOLID
-        break;
     }
 
     if (band_animation_state) {
