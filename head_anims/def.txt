@@ -4,8 +4,7 @@
 spray default
 
 #camo
-wiggle
-solid
+slowtwinkle
 
 1,1,1,1,
 1,1,1,1,500,0

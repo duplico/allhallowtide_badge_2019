@@ -17,6 +17,7 @@ color_corrections = {
     "b3" : (0xfe, 0xdd, 0x63),
     "b4" : (0xbe, 0xa6, 0x38),
     "dim" : (0, 0, 15),
+    "fadered" : (15, 0, 0),
 }
 
 BOOP_LEN = 6000

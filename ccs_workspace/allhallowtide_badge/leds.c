@@ -49,6 +49,11 @@ rgbdelta_t band_colors_step[BAND_LED_COUNT] = {
         {0, 0, 0},
 };
 
+/// Does the heart LED need re-display to the LED driver?
+uint8_t heart_dirty = 1;
+/// Does the band display need re-sent to the LED driver?
+uint8_t band_dirty = 1;
+
 // TODO: Refactor this out:
 uint8_t band_animation_state = 0;
 
@@ -229,18 +234,18 @@ void set_band_gs(const rgbcolor_t* band_colors) {
         if (g>UINT16_MAX) g=UINT16_MAX;
         if (b>UINT16_MAX) b=UINT16_MAX;
 
-        tlc_gs[(3-flower_index)*3] = r;
-        tlc_gs[(3-flower_index)*3] = g;
-        tlc_gs[(3-flower_index)*3] = b;
+        tlc_gs[3+1+(3-flower_index)*3] = b;
+        tlc_gs[3+2+(3-flower_index)*3] = g;
+        tlc_gs[3+3+(3-flower_index)*3] = r;
     }
 }
 
 void band_set_steps_and_go() {
     // TODO: Modify this as appropriate:
-    band_hold_steps = band_current_anim->durations[band_anim_frame]; // / LEGS_DUR_STEP;
+    band_hold_steps = band_current_anim->durations[band_anim_frame] / 13; // / LEGS_DUR_STEP;
     band_hold_index = 0;
     // TODO: And this:
-    band_transition_steps = band_current_anim->fade_durs[band_anim_frame]; // / LEGS_DUR_STEP;
+    band_transition_steps = band_current_anim->fade_durs[band_anim_frame] / 13; // / LEGS_DUR_STEP;
     band_transition_index = 0;
 
     band_load_colors();
@@ -291,37 +296,6 @@ void band_start_anim_by_id(uint8_t anim_id, uint8_t anim_type, uint8_t loop, uin
         return;
     }
 
-    // If we're changing our ambient animation, then we also need to change
-    //  the colors of our "ink" spray animation.
-    // TODO: This is likely unnecessary for allhallowtide.
-    if (ambient) {
-//        for (uint8_t at=0; at<3; at++) {
-//            for (uint16_t i=0; i< leg_meta_mate_anim_set[at]->len; i++) {
-//                for (uint8_t j=0; j<4; j++) {
-//                    if (leg_meta_mate_anim_set[at]->colors[i][j].red || leg_meta_mate_anim_set[at]->colors[i][j].green || leg_meta_mate_anim_set[at]->colors[i][j].blue) {
-//                        switch(at) {
-//                        case 0:
-//                            leg_meta_mate_camo_frames[i][j].red = sprays[anim_id].red;
-//                            leg_meta_mate_camo_frames[i][j].green = sprays[anim_id].green;
-//                            leg_meta_mate_camo_frames[i][j].blue = sprays[anim_id].blue;
-//                            break;
-//                        case 1:
-//                            leg_meta_mate_ink_frames[i][j].red = sprays[anim_id].red;
-//                            leg_meta_mate_ink_frames[i][j].green = sprays[anim_id].green;
-//                            leg_meta_mate_ink_frames[i][j].blue = sprays[anim_id].blue;
-//                            break;
-//                        case 2:
-//                            leg_meta_mate_doubleink_frames[i][j].red = sprays[anim_id].red;
-//                            leg_meta_mate_doubleink_frames[i][j].green = sprays[anim_id].green;
-//                            leg_meta_mate_doubleink_frames[i][j].blue = sprays[anim_id].blue;
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-    }
-
     band_start_anim_by_struct(legs_all_anim_sets[anim_id][anim_type], loop, ambient);
 
     band_anim_id = anim_id;
@@ -351,11 +325,6 @@ void band_next_anim_frame() {
 
 /// Do a time step of the LED animation system.
 void leds_timestep() {
-    /// Does the heart LED need re-display to the LED driver?
-    static uint8_t heart_dirty = 1;
-    /// Does the band display need re-sent to the LED driver?
-    static uint8_t band_dirty = 1;
-
     // If the ambient light correction has changed, mark everything dirty.
     if (current_ambient_correct != previous_ambient_correct) {
         previous_ambient_correct = current_ambient_correct;

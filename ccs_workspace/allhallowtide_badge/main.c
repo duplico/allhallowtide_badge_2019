@@ -129,6 +129,8 @@ void generate_config() {
 extern tSensor BTN1_BOOP;
 extern tSensor BTN3_EYE;
 
+uint8_t anim_id = 0;
+
 void boop_cb(tSensor* pSensor)
 {
     if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
@@ -141,7 +143,8 @@ void eye_cb(tSensor* pSensor)
 {
     if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
     {
-        __no_operation();
+        anim_id = (anim_id + 1) % 8;
+        band_start_anim_by_id(anim_id, 0, 0, 1);
     }
 }
 
@@ -188,22 +191,6 @@ int main(void) {
     }
 
     tlc_stage_blank(0);
-    for (uint8_t i=1; i<16; i++) {
-        switch((i-1) % 3) {
-        case 0:
-            tlc_gs[i] = 0x0010;
-            break;
-        case 1:
-            tlc_gs[i] = 0x0010;
-            break;
-        case 2:
-            tlc_gs[i] = 0x0010;
-            break;
-        }
-    }
-
-    tlc_set_fun();
-    tlc_set_gs();
     tlc_set_fun();
 
     CAPT_appStart();
@@ -211,13 +198,15 @@ int main(void) {
     MAP_CAPT_registerCallback(&BTN1_BOOP, &boop_cb);
     MAP_CAPT_registerCallback(&BTN3_EYE, &eye_cb);
 
+    band_start_anim_by_id(anim_id, 0, 0, 1);
+
     while(1)
     {
         // Handle (or attempt to handle) and needed CapTIvate signals:
         CAPT_appHandler();
 
         if (f_time_loop) {
-//            leds_timestep();
+            leds_timestep();
             // TODO: Poll for o_hai
             f_time_loop = 0;
         }

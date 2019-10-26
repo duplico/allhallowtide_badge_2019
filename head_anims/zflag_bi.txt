@@ -6,7 +6,7 @@
 spray bipink
 
 #camo
-solid
+hardtwinkle
 
 0,0,0,1,
 0,0,0,1,50,180,
