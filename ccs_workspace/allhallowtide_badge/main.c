@@ -4,6 +4,9 @@
 #include "tlc5948a.h"
 
 #include "CAPT_App.h"
+#include "CAPT_Type.h"
+#include "CAPT_Touch.h"
+#include "rom_map_captivate.h"
 #include "leds.h"
 
 volatile uint8_t f_time_loop;
@@ -78,13 +81,13 @@ void init_io() {
     // P1.2     UCB0SIMO    (SEL 01; DIR 0)
     // P1.3     MCLK/GSCLK  (SEL 10; DIR 1)
     // P1.4     loopback    (SEL 00; DIR 0)
-    // P1.5     cap         (SEL 00; DIR 0) // TODO: cap
+    // P1.5     cap         (SEL 11; DIR 0) // EYE
     // P1.6     unused      (SEL 00; DIR 0)
-    // P1.7     cap         (SEL 00; DIR 0) // TODO: cap
+    // P1.7     cap         (SEL 11; DIR 0) // BOOP
     P1DIR = 0b00001011;
-    P1SEL0 = 0b00000110; // LSB
-//    P1SEL1 = 0b00001000; // MSB - GSCLK enabled
-    P1SEL1 = 0b00000000; // MSB - GSCLK disabled (GPIO output instead)
+    P1SEL0 = 0b10100110; // LSB
+//    P1SEL1 = 0b10101000; // MSB - GSCLK enabled
+    P1SEL1 = 0b10100000; // MSB - GSCLK disabled (GPIO output instead)
     P1REN = 0x00;
     P1OUT = 0x00;
 
@@ -120,6 +123,26 @@ void generate_config() {
 //    badge_conf.element_selected = ELEMENT_COUNT_NONE;
 //    // The handle is all zeroes. Empty string. That's fine.
 //    write_conf();
+}
+
+// TODO:
+extern tSensor BTN1_BOOP;
+extern tSensor BTN3_EYE;
+
+void boop_cb(tSensor* pSensor)
+{
+    if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
+    {
+        __no_operation();
+    }
+}
+
+void eye_cb(tSensor* pSensor)
+{
+    if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
+    {
+        __no_operation();
+    }
 }
 
 int main(void) {
@@ -183,15 +206,15 @@ int main(void) {
     tlc_set_gs();
     tlc_set_fun();
 
-
     CAPT_appStart();
+
+    MAP_CAPT_registerCallback(&BTN1_BOOP, &boop_cb);
+    MAP_CAPT_registerCallback(&BTN3_EYE, &eye_cb);
 
     while(1)
     {
         // Handle (or attempt to handle) and needed CapTIvate signals:
-        if (CAPT_appHandler()) {
-            // A button was pressed.
-        }
+        CAPT_appHandler();
 
         if (f_time_loop) {
 //            leds_timestep();

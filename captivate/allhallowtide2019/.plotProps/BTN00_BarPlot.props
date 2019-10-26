@@ -1,5 +1,5 @@
 #C:\Users\george\project\allhallowtide_badge_2019\captivate\allhallowtide2019/.plotProps/BTN00_BarPlot.props Plotter Data
-#Fri Oct 18 12:16:53 CDT 2019
+#Fri Oct 25 19:35:00 CDT 2019
 Signal.alias.Touch\ Threshold=
 Signal.alias.GRID=
 xlabel=Time
@@ -16,14 +16,14 @@ Lta=on
 Count=on
 titleFont=helvetica-BOLD-24
 xmin=-1.000000
-xmax=3.000000
+xmax=1.000000
 legendFont=helvetica-BOLD-14
 ymin=0.000000
 Prox\ Threshold=on
-yrangetype=false
 ymax=1000.000000
-Touch\ Threshold=on
+yrangetype=false
 graphtype=PtsCon
+Touch\ Threshold=on
 Signal.alias.Prox\ Threshold=
 persistence=2000
 Signal.alias.Delta=

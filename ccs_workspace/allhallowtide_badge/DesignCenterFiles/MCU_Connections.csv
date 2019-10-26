@@ -1,0 +1,3 @@
+Sensor, Electrode, MCU Pin, Package Pin
+BTN3_EYE,RX00,CAP0.1,12
+BTN1_BOOP,RX00,CAP0.3,10

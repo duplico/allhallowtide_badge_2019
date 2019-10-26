@@ -1,0 +1,27 @@
+#C:\Users\george\project\allhallowtide_badge_2019\captivate\allhallowtide2019/.plotProps/BTN1_BOOP_OscilloscopePlot.props Plotter Data
+#Fri Oct 25 21:58:40 CDT 2019
+Signal.alias.E00\ Prox=
+xlabel=Time
+horiz_data_grid=true
+ylabel=Channel Data
+vert_data_grid=false
+E00\ Delta=off
+Signal.alias.E00\ Delta=
+labelFont=helvetica-BOLD-12
+xrangetype=true
+titleFont=helvetica-BOLD-24
+xmin=0.000000
+xmax=10.000000
+Signal.alias.E00\ Lta=
+legendFont=helvetica-BOLD-14
+E00\ Count=on
+E00\ Touch=off
+ymin=0.000000
+Signal.alias.E00\ Touch=
+Signal.alias.E00\ Count=
+ymax=10.000000
+yrangetype=true
+graphtype=PtsCon
+persistence=2000
+E00\ Prox=off
+E00\ Lta=on
