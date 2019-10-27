@@ -47,5 +47,6 @@ typedef struct {
 
 void leds_timestep();
 void band_start_anim_by_id(uint8_t anim_id, uint8_t anim_type, uint8_t loop, uint8_t ambient);
+void band_start_anim_by_struct(const band_animation_t *animation, uint8_t loop, uint8_t ambient);
 
 #endif /* LEDS_H_ */

@@ -4,6 +4,7 @@
 #include "tlc5948a.h"
 
 #include "captivate.h"
+#include "band_anims.h"
 
 #include "leds.h"
 
@@ -134,6 +135,7 @@ void boop_cb(tSensor* pSensor)
     if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
     {
         __no_operation();
+        band_start_anim_by_struct(&meta_boop_band, 0, 0);
     }
 }
 
