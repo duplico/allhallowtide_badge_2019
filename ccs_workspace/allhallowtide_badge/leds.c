@@ -174,25 +174,12 @@ void set_band_gs(const rgbcolor16_t* band_colors) {
         g = band_colors[flower_index].green << 1;
         b = band_colors[flower_index].blue << 1;
 
-        // Handle the particulars of the animation's
-        //  sub-type. (twinkling, etc.)
-        switch(band_current_anim->anim_type) {
-        case ANIM_TYPE_FASTTWINKLE:
+        if (band_current_anim->anim_type == ANIM_TYPE_FASTTWINKLE) {
             if (band_twinkle_bits & (1 << flower_index)) {
                 r = r >> 2;
                 g = g >> 2;
                 b = b >> 2;
             }
-            break;
-        case ANIM_TYPE_SLOWTWINKLE:
-            if (band_twinkle_bits & (1 << flower_index)) {
-                r = r >> 2;
-                g = g >> 2;
-                b = b >> 2;
-            }
-            break;
-        default:
-            break;
         }
 
         // TODO:
@@ -280,6 +267,7 @@ void band_next_anim_frame() {
             band_anim_looping--;
         } else { // not ambient, no loops remaining
             band_is_ambient = 1; // Now we're back to being ambient...
+            current_ambient_correct = 0;
             band_start_anim_by_id(band_saved_anim_id, band_saved_anim_type, 0, 1);
             // TODO: Do any additional needs for the completion of a non-ambient animation.
             return; // skip the transitions_and_go because that's called in start_anim.

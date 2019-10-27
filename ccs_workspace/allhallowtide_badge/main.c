@@ -85,8 +85,8 @@ void init_io() {
     // P1.7     cap         (SEL 11; DIR 0) // BOOP
     P1DIR = 0b00001011;
     P1SEL0 = 0b10100110; // LSB
-    P1SEL1 = 0b10101000; // MSB - GSCLK enabled
-//    P1SEL1 = 0b10100000; // MSB - GSCLK disabled (GPIO output instead)
+//    P1SEL1 = 0b10101000; // MSB - GSCLK enabled
+    P1SEL1 = 0b10100000; // MSB - GSCLK disabled (GPIO output instead)
     P1REN = 0x00;
     P1OUT = 0x00;
 
@@ -134,7 +134,7 @@ void boop_cb(tSensor* pSensor)
 {
     if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
     {
-        __no_operation();
+        current_ambient_correct = 4;
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
     }
 }
@@ -176,6 +176,20 @@ int main(void) {
 
     Timer_A_initUpMode(TIMER_A0_BASE, &next_channel_timer_init);
     Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
+
+
+    next_channel_timer_init.clockSource = TIMER_A_CLOCKSOURCE_SMCLK;
+    next_channel_timer_init.clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_8;
+    next_channel_timer_init.timerPeriod = 1;
+    next_channel_timer_init.timerInterruptEnable_TAIE = TIMER_A_TAIE_INTERRUPT_DISABLE;
+    next_channel_timer_init.captureCompareInterruptEnable_CCR0_CCIE = TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE;
+    next_channel_timer_init.timerClear = TIMER_A_SKIP_CLEAR;
+    next_channel_timer_init.startTimer = false;
+
+    if (!(P1SEL1 & BIT3)) {
+        Timer_A_initUpMode(TIMER_A1_BASE, &next_channel_timer_init);
+        Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
+    }
 
     tlc_stage_blank(0);
     tlc_set_fun();
@@ -225,4 +239,11 @@ __interrupt void TIMER0_A0_ISR_HOOK(void)
 {
     f_time_loop = 1;
     __bic_SR_register_on_exit(LPM0_bits);
+}
+
+// Dedicated ISR for CCR0. Vector is cleared on service.
+#pragma vector=TIMER1_A0_VECTOR
+__attribute__((ramfunc))__interrupt void TIMER1_A0_ISR_HOOK(void)
+{
+    P1OUT ^= BIT3;
 }
