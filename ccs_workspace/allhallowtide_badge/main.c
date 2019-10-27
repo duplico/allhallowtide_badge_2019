@@ -7,6 +7,7 @@
 #include "band_anims.h"
 
 #include "leds.h"
+#include "badge.h"
 
 volatile uint8_t f_time_loop;
 
@@ -104,31 +105,34 @@ void init_io() {
     PM5CTL0 &= ~LOCKLPM5;
 }
 
-void write_conf() {
-//    __bic_SR_register(GIE);
+#pragma NOINIT(badge_conf)
+badge_conf_t badge_conf;
+
+void set_badge_seen(uint8_t id) {
+    __bic_SR_register(GIE);
 //    // Unlock FRAM access:
-//    SYSCFG0 = FRWPPW | PFWP_0;
-//    memcpy(&badge_conf_persistent, &badge_conf, sizeof(cbadge_conf_t));
+    SYSCFG0 = FRWPPW | DFWP_0;
+    badge_conf.badges_seen |= (BIT0 << id);
+    badge_conf.badge_seen_count++;
 //    // Lock FRAM access:
-//    SYSCFG0 = FRWPPW | PFWP_1;
-//    __bis_SR_register(GIE);
+    SYSCFG0 = FRWPPW | DFWP_1;
+    __bis_SR_register(GIE);
 }
 
-void generate_config() {
-//    // We treat this like FIRST BOOT. Need to initialize the config.
-//    // The run time initializes badge_conf to all 0s for us.
-//    badge_conf.badge_id = CBADGE_ID_MAX_UNASSIGNED;
-//    badge_conf.initialized = 1;
-//    badge_conf.element_selected = ELEMENT_COUNT_NONE;
-//    // The handle is all zeroes. Empty string. That's fine.
-//    write_conf();
+uint8_t badge_seen(uint8_t id) {
+    return badge_conf.badges_seen & BIT0 << id;
+}
+
+uint8_t band_unlocked_count() {
+    if (1 + badge_conf.badge_seen_count / 2 > HEAD_ANIM_COUNT) {
+        return HEAD_ANIM_COUNT;
+    }
+    return 1 + badge_conf.badge_seen_count / 2;
 }
 
 // TODO:
 extern tSensor BTN1_BOOP;
 extern tSensor BTN3_EYE;
-
-uint8_t anim_id = 0;
 
 void boop_cb(tSensor* pSensor)
 {
@@ -136,7 +140,7 @@ void boop_cb(tSensor* pSensor)
     {
         current_ambient_correct = 4;
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
-        heart_state = 127;
+//        heart_state = 127; // TODO: move to pairing
     }
 }
 
@@ -144,8 +148,13 @@ void eye_cb(tSensor* pSensor)
 {
     if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
     {
-        anim_id = (anim_id + 1) % 8;
-        band_start_anim_by_id(anim_id, 0, 0, 1);
+
+        SYSCFG0 = FRWPPW | DFWP_0;
+        // TODO: handle unlocks:
+        badge_conf.current_band_id = (badge_conf.current_band_id + 1) % band_unlocked_count();
+        SYSCFG0 = FRWPPW | DFWP_1;
+
+        band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
     }
 }
 
@@ -206,7 +215,12 @@ int main(void) {
     MAP_CAPT_enableISR(CAPT_TIMER_INTERRUPT);
 
 
-    band_start_anim_by_id(anim_id, 0, 0, 1);
+    if (badge_conf.current_band_id >= HEAD_ANIM_COUNT) {
+        SYSCFG0 = FRWPPW | DFWP_0;
+        badge_conf.current_band_id = 0;
+        SYSCFG0 = FRWPPW | DFWP_1;
+    }
+    band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
 
     while(1)
     {

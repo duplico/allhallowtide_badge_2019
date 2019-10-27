@@ -169,7 +169,7 @@ SECTIONS
     .sysmem     : {} > RAM                  /* Dynamic memory allocation area    */
     .bss        : {} > RAM                  /* Global & static vars              */
     .data       : {} > RAM                  /* Global & static vars              */
-    .TI.noinit  : {} > RAM                  /* For #pragma noinit                */
+    .TI.noinit  : {} > INFO                  /* For #pragma noinit                */
     .stack      : {} > RAM (HIGH)           /* Software system stack             */
 
     /* MSP430 INFO memory segments */
