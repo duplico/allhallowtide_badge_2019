@@ -1,18 +1,6 @@
 #include "leds.h"
 #include "band_anims.h"
 
-///////////////// DEF:
-// frames for the band:
-const rgbcolor_t def_band_frames[][4] = {
-    {{0x28, 0xf0, 0xb2}, {0x28, 0xf0, 0xb2}, {0x28, 0xf0, 0xb2}, {0x28, 0xf0, 0xb2}},
-};
-const uint16_t def_band_durations[] = {500};
-const uint16_t def_band_fade_durs[] = {0};
-// the animation:
-const band_animation_t def_band = {def_band_frames, def_band_durations, def_band_fade_durs, 1, ANIM_TYPE_SOLID, 12};
-
-const band_animation_t *def_anim_set[1] = {&def_band};
-
 ///////////////// FIRE:
 // frames for the band:
 const rgbcolor_t fire_band_frames[][4] = {
@@ -174,4 +162,4 @@ const band_animation_t zflag_trans_band = {zflag_trans_band_frames, zflag_trans_
 
 const band_animation_t *zflag_trans_anim_set[1] = {&zflag_trans_band};
 
-const band_animation_t **legs_all_anim_sets[] = {def_anim_set, fire_anim_set, geek_girl_anim_set, rainbow_anim_set, zflag_bear_anim_set, zflag_bi_anim_set, zflag_leather_anim_set, zflag_trans_anim_set, meta_boop_anim_set};
+const band_animation_t **legs_all_anim_sets[] = {fire_anim_set, geek_girl_anim_set, rainbow_anim_set, zflag_bear_anim_set, zflag_bi_anim_set, zflag_leather_anim_set, zflag_trans_anim_set, meta_boop_anim_set};

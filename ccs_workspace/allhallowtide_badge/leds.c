@@ -58,11 +58,12 @@ uint8_t band_dirty = 1;
 uint8_t band_animation_state = 0;
 
 rgbcolor16_t heart_color_curr;
-rgbcolor16_t heart_color_next;
+rgbcolor_t heart_color = {
+    0xff, 0x0f, 0x0f
+};
 rgbdelta_t heart_color_step;
 uint8_t heart_frame_index;
 
-// TODO: use:
 uint8_t heart_state;
 
 uint8_t band_anim_frame;
@@ -288,25 +289,24 @@ void leds_timestep() {
     }
 
     // Handle the heart.
+    if (heart_state) {
+        if (heart_frame_index == 0 || heart_frame_index == 24) {
+            heart_color_curr.red = heart_color.red << (1 + heart_state / 16);
+            heart_color_curr.green = heart_color.green << (1 + heart_state / 16);
+            heart_color_curr.blue = heart_color.blue << (1 + heart_state / 16);
+            heart_frame_index++;
+        } else if (heart_frame_index == 80) {
+            heart_frame_index = 0;
+            heart_state--;
+        } else {
+            heart_color_curr.red >>= 1;
+            heart_color_curr.green >>= 1;
+            heart_color_curr.blue >>= 1;
+            heart_frame_index++;
+        }
 
-    if (heart_frame_index == 0 || heart_frame_index == 30) {
-        // first beat or second beat
-        // TODO: heart color
-        // TODO: color16:
-        heart_color_curr.red = 0xffff;
-        heart_color_curr.green = 0;
-        heart_color_curr.blue = 0;
-        heart_frame_index++;
-    } else if (heart_frame_index == 100) {
-        heart_frame_index = 0;
-    } else {
-        heart_color_curr.red >>= 1;
-        heart_color_curr.green >>= 1;
-        heart_color_curr.blue >>= 1;
-        heart_frame_index++;
+        heart_dirty = 1;
     }
-
-    heart_dirty = 1;
 
     if (heart_dirty) {
         // TODO: Set up the display in tlc_gs.

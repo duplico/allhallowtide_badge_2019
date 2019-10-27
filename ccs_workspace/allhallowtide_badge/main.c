@@ -136,6 +136,7 @@ void boop_cb(tSensor* pSensor)
     {
         current_ambient_correct = 4;
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
+        heart_state = 127;
     }
 }
 

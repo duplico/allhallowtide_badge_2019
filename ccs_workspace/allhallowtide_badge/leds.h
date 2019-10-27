@@ -45,6 +45,8 @@ typedef struct {
     uint8_t boop_loops;
 } band_animation_t;
 
+extern rgbcolor_t heart_color;
+extern uint8_t heart_state;
 extern uint8_t current_ambient_correct;
 
 void leds_timestep();

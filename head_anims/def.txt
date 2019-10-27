@@ -1,7 +1,0 @@
-2 off
-1 default
-
-# band
-solid
-
-1,1,1,1,500,0
