@@ -145,11 +145,11 @@ def main():
                 boop_loops = BOOP_LEN / total_duration
             
             c_lines.append("};")
-            c_lines.append("uint16_t %s_band_durations[] = {%s};" % (anim_name, ', '.join(metadata1)))
-            c_lines.append("uint16_t %s_band_fade_durs[] = {%s};" % (anim_name, ', '.join(metadata2)))
+            c_lines.append("const uint16_t %s_band_durations[] = {%s};" % (anim_name, ', '.join(metadata1)))
+            c_lines.append("const uint16_t %s_band_fade_durs[] = {%s};" % (anim_name, ', '.join(metadata2)))
             
-            h_lines.append("extern uint16_t %s_band_durations[];" % anim_name)
-            h_lines.append("extern uint16_t %s_band_fade_durs[];" % anim_name)
+            h_lines.append("extern const uint16_t %s_band_durations[];" % anim_name)
+            h_lines.append("extern const uint16_t %s_band_fade_durs[];" % anim_name)
             
             c_lines.append("// the animation:")
             c_lines.append("const band_animation_t %s_band = {%s_band_frames, %s_band_durations, %s_band_fade_durs, %d, ANIM_TYPE_%s, %d};" % (anim_name, anim_name, anim_name, anim_name, len(camo_frames), local_type.upper(), boop_loops))
@@ -172,11 +172,7 @@ def main():
     h_lines.append("extern const band_animation_t **legs_all_anim_sets[];")
     
     h_lines.append("#endif // _H_")
-    
-    all_spray_colors += meta_spray_colors
-    h_lines.append("extern const rgbcolor_t sprays[];")
-    c_lines.append("const rgbcolor_t sprays[%d] = {%s};" % (len(all_animations+meta_animations),', '.join(map(lambda rgb: "{0x%x, 0x%x, 0x%x}" % tuple(map(int, rgb)), all_spray_colors))))
-        
+     
     with open("band_anims.c", 'w') as f:
         f.writelines(map(lambda a: a+"\n", c_lines))
     
