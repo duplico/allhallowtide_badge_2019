@@ -57,9 +57,10 @@ uint8_t band_dirty = 1;
 // TODO: Refactor this out:
 uint8_t band_animation_state = 0;
 
-rgbcolor_t heart_color_curr;
-rgbcolor_t heart_color_next;
+rgbcolor16_t heart_color_curr;
+rgbcolor16_t heart_color_next;
 rgbdelta_t heart_color_step;
+uint8_t heart_frame_index;
 
 // TODO: use:
 uint8_t heart_state;
@@ -288,10 +289,30 @@ void leds_timestep() {
 
     // Handle the heart.
 
-    // TODO: Determine if animation tasks need to happen, and perform them.
+    if (heart_frame_index == 0 || heart_frame_index == 30) {
+        // first beat or second beat
+        // TODO: heart color
+        // TODO: color16:
+        heart_color_curr.red = 0xffff;
+        heart_color_curr.green = 0;
+        heart_color_curr.blue = 0;
+        heart_frame_index++;
+    } else if (heart_frame_index == 100) {
+        heart_frame_index = 0;
+    } else {
+        heart_color_curr.red >>= 1;
+        heart_color_curr.green >>= 1;
+        heart_color_curr.blue >>= 1;
+        heart_frame_index++;
+    }
+
+    heart_dirty = 1;
 
     if (heart_dirty) {
         // TODO: Set up the display in tlc_gs.
+        tlc_gs[3] = heart_color_curr.red;
+        tlc_gs[2] = heart_color_curr.green;
+        tlc_gs[1] = heart_color_curr.blue;
     }
 
     // Handle the band:
