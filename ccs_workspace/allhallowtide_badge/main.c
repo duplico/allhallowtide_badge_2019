@@ -8,8 +8,10 @@
 
 #include "leds.h"
 #include "badge.h"
+#include "serial.h"
 
 volatile uint8_t f_time_loop;
+volatile uint8_t f_paired;
 
 /// Initialize clock signals and the three system clocks.
 /**
@@ -34,7 +36,6 @@ void init_clocks() {
     // DCO  (Digitally-controlled oscillator)
     //  Let's bring this up to 8 MHz or so.
 
-    // TODO:
     // Configure FRAM wait state (set to 1 to support 16MHz MCLK)
     FRAMCtl_configureWaitStateControl(FRAMCTL_ACCESS_TIME_CYCLES_1);
 
@@ -53,14 +54,14 @@ void init_clocks() {
     // SYSTEM CLOCKS
     // =============
 
-    // MCLK (8 MHz)
+    // MCLK (16 MHz)
     //  All sources but MODOSC are available at up to /128
-    //  Set to DCO/2 = 8 MHz
+    //  Set to DCO/1 = 8 MHz
     // DIVM__1;
 
     // SMCLK (8 MHz)
     //  Derived from MCLK with divider up to /8
-    //  Set to MCLK/1 = 8 MHz
+    //  Set to MCLK/2 = 8 MHz
     // DIVS__1;
 
     CSCTL5 = VLOAUTOOFF_1 | DIVS__2 | DIVM__1;
@@ -71,9 +72,8 @@ void init_clocks() {
  **
  */
 void init_io() {
-    // TODO:
-    // USCIARMP=1
-    // USCIBRMP=0
+    // Set up the alternate pinout for UCA0
+    SYSCFG3 |= USCIARMP;
 
     // GPIO:
     // P1.0     LAT         (SEL 00; DIR 1)
@@ -140,7 +140,10 @@ void boop_cb(tSensor* pSensor)
     {
         current_ambient_correct = 4;
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
-//        heart_state = 127; // TODO: move to pairing
+        if (!heart_state) {
+            // TODO: color
+            heart_state = 3;
+        }
     }
 }
 
@@ -150,7 +153,6 @@ void eye_cb(tSensor* pSensor)
     {
 
         SYSCFG0 = FRWPPW | DFWP_0;
-        // TODO: handle unlocks:
         badge_conf.current_band_id = (badge_conf.current_band_id + 1) % band_unlocked_count();
         SYSCFG0 = FRWPPW | DFWP_1;
 
@@ -167,6 +169,7 @@ int main(void) {
 
     __bis_SR_register(GIE);
     tlc_init();
+    serial_init();
 
     // TODO: Refactor to another function.
     // For our timer, we're going to use ACLK, which is sourced from REFO.
@@ -206,7 +209,7 @@ int main(void) {
 
     CAPT_initUI(&g_uiApp);
     CAPT_calibrateUI(&g_uiApp);
-    g_uiApp.ui8AppLPM = 0; // No LPM, keep MCLK on.
+//    g_uiApp.ui8AppLPM = 0; // No LPM, keep MCLK on. TODO
     MAP_CAPT_registerCallback(&BTN1_BOOP, &boop_cb);
     MAP_CAPT_registerCallback(&BTN3_EYE, &eye_cb);
     MAP_CAPT_selectTimerSource(CAPT_TIMER_SRC_ACLK);
@@ -222,6 +225,9 @@ int main(void) {
     }
     band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
 
+    uint8_t ohai_state_prev = 0;
+    uint8_t ohai_state = 0;
+
     while(1)
     {
         if (g_bConvTimerFlag == true)
@@ -236,15 +242,32 @@ int main(void) {
 
         if (f_time_loop) {
             leds_timestep();
-            // TODO: Poll for o_hai
+
+            ohai_state_prev = ohai_state;
+            ohai_state = (P2IN & BIT2) ? 1 : 0;
+
+            if (serial_ll_state == SERIAL_LL_IDLE) {
+                // We're looking for o_hai to go low.
+                if (ohai_state == ohai_state_prev && ohai_state == 0) {
+                    serial_ll_state = SERIAL_LL_OPEN_WAIT;
+                }
+            } else {
+                // We're looking for o_hai to go high.
+                if (ohai_state == ohai_state_prev && ohai_state == 1) {
+                    // unplugged
+                    serial_ll_state = SERIAL_LL_IDLE;
+                } else {
+                    serial_timeout();
+                }
+
+                // Keep the heart on full until unplug.
+                heart_state = 127;
+            }
+
             f_time_loop = 0;
         }
 
-        // Against all my instincts, we CANNOT use a low power mode here.
-        //  This is because the only clock signal I had available for the GSCLK
-        //  for the LED driver was the pin for MCLK. So, I can't turn off the
-        //  CPU clock, or the LEDs will turn off. Or at least stay at their
-        //  current brightness. Lol.
+        __bis_SR_register(LPM0_bits);
     } // End background loop
 }
 
@@ -253,7 +276,7 @@ int main(void) {
 __interrupt void TIMER0_A0_ISR_HOOK(void)
 {
     f_time_loop = 1;
-    __bic_SR_register_on_exit(LPM0_bits);
+    LPM0_EXIT;
 }
 
 // Dedicated ISR for CCR0. Vector is cleared on service.

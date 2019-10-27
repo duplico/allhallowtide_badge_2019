@@ -15,4 +15,7 @@ typedef struct {
     uint8_t current_band_id;
 } badge_conf_t;
 
+extern volatile uint8_t f_paired;
+extern badge_conf_t badge_conf;
+
 #endif /* BADGE_H_ */

@@ -64,7 +64,7 @@ const rgbcolor_t meta_boop_band_frames[][4] = {
     {{0x0, 0x0, 0x0}, {0x0, 0x0, 0x0}, {0x0, 0x0, 0x0}, {0x0, 0x0, 0x0}},
 };
 const uint16_t meta_boop_band_durations[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1000};
-const uint16_t meta_boop_band_fade_durs[] = {45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 1000};
+const uint16_t meta_boop_band_fade_durs[] = {45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 750};
 // the animation:
 const band_animation_t meta_boop_band = {meta_boop_band_frames, meta_boop_band_durations, meta_boop_band_fade_durs, 29, ANIM_TYPE_SOLID, 1};
 
