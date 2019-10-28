@@ -10,6 +10,9 @@
 #include "badge.h"
 #include "serial.h"
 
+#pragma NOINIT(badge_conf)
+badge_conf_t badge_conf;
+
 extern tSensor BTN1_BOOP;
 extern tSensor BTN3_EYE;
 
@@ -83,15 +86,14 @@ void init_io() {
     // P1.0     LAT         (SEL 00; DIR 1)
     // P1.1     UCB0 SCLK   (SEL 01; DIR 1)
     // P1.2     UCB0SIMO    (SEL 01; DIR 0)
-    // P1.3     MCLK/GSCLK  (SEL 10; DIR 1)
+    // P1.3     GSCLK       (SEL 00; DIR 1)
     // P1.4     loopback    (SEL 00; DIR 0)
     // P1.5     cap         (SEL 11; DIR 0) // EYE
     // P1.6     unused      (SEL 00; DIR 0)
     // P1.7     cap         (SEL 11; DIR 0) // BOOP
     P1DIR = 0b00001011;
     P1SEL0 = 0b10100110; // LSB
-//    P1SEL1 = 0b10101000; // MSB - GSCLK enabled
-    P1SEL1 = 0b10100000; // MSB - GSCLK disabled (GPIO output instead)
+    P1SEL1 = 0b10100000; // MSB
     P1REN = 0x00;
     P1OUT = 0x00;
 
@@ -108,9 +110,6 @@ void init_io() {
     // (AKA the MSP430FR magic make-it-work command)
     PM5CTL0 &= ~LOCKLPM5;
 }
-
-#pragma NOINIT(badge_conf)
-badge_conf_t badge_conf;
 
 uint8_t badge_seen(uint8_t id) {
     if (badge_conf.badges_seen & (BIT0 << id))
@@ -149,11 +148,6 @@ void boop_cb(tSensor* pSensor)
         current_ambient_correct = 5;
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
         if (!heart_state) {
-            // TODO: not this:
-            SYSCFG0 = FRWPPW | DFWP_0;
-            badge_conf.badge_id++;
-            SYSCFG0 = FRWPPW | DFWP_1;
-
             heart_is_boop = 1;
             heart_color = heart_color_options[badge_conf.badge_id % HEART_COLOR_COUNT];
             heart_state = 3;
@@ -193,7 +187,8 @@ void init_timers() {
     Timer_A_initUpMode(TIMER_A0_BASE, &next_channel_timer_init);
     Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
 
-
+    // Then, this is the GSCLK timer. It's much faster, and sourced from
+    //  SMCLK/8 so it's about 0.5 MHz.
     next_channel_timer_init.clockSource = TIMER_A_CLOCKSOURCE_SMCLK;
     next_channel_timer_init.clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_8;
     next_channel_timer_init.timerPeriod = 1;
@@ -202,10 +197,8 @@ void init_timers() {
     next_channel_timer_init.timerClear = TIMER_A_SKIP_CLEAR;
     next_channel_timer_init.startTimer = false;
 
-    if (!(P1SEL1 & BIT3)) {
-        Timer_A_initUpMode(TIMER_A1_BASE, &next_channel_timer_init);
-        Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
-    }
+    Timer_A_initUpMode(TIMER_A1_BASE, &next_channel_timer_init);
+    Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
 }
 
 int main(void) {
