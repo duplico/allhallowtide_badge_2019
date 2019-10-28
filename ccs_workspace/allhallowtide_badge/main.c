@@ -174,7 +174,6 @@ void init_timers() {
     // We'd like to have this run at like 60-100 Hz, I think.
     // We'll divide our 32k clock by 64 to get 512 Hz.
     // Then, we'll use a period of 8 to get 64ish frames per second.
-    // TODO: Eliminate driverlib.
     Timer_A_initUpModeParam next_channel_timer_init = {};
     next_channel_timer_init.clockSource = TIMER_A_CLOCKSOURCE_ACLK;
     next_channel_timer_init.clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_64;
@@ -312,6 +311,18 @@ int main(void) {
         __bis_SR_register(LPM0_bits);
     } // End background loop
 }
+
+// NB: In the below ISRs, for historical reasons, the vectors are named
+//      in a confusing way.
+//
+// **** TL;DR: Timer A0 is TIMER0_Axxxx; Timer A1 is TIMER1_Axxxx.
+//
+//     This is, apparently, because originally devices only had a single
+//      Timer A, Timer B, etc. So, the CCR registers' index determined
+//      the major number: TIMER_A0 (Timer A, CCR0); TIMER_A1 (Timer A, CCR1),
+//      etc. But now, devices like this one have multiple Timer As. So,
+//      the naming convention must be Timer0_A... for Timer A0.
+//     Anyway, that's why it looks like this.
 
 // Dedicated ISR for CCR0. Vector is cleared on service.
 #pragma vector=TIMER0_A0_VECTOR
