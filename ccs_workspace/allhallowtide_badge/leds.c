@@ -85,10 +85,6 @@ uint8_t previous_ambient_correct;
 uint8_t band_twinkle_bits = 0xea;
 uint16_t band_anim_adjustment_index = 0;
 
-void set_heart() {
-
-}
-
 /// Start a new frame, setting up current, source, dest, and step.
 void band_load_colors() {
     // leg_colors_curr <- tentacle_current_anim[tentacle_anim_index]
@@ -206,7 +202,7 @@ void band_start_anim_by_struct(const band_animation_t *animation, uint8_t loop, 
 
     band_set_steps_and_go();
     set_band_gs(band_colors_curr);
-    // TODO: Need to set it dirty.
+    band_dirty = 1;
 }
 
 void band_start_anim_by_id(uint8_t anim_id, uint8_t anim_type, uint8_t loop, uint8_t ambient) {
