@@ -18,7 +18,6 @@ typedef struct {
 } badge_conf_t;
 
 extern volatile uint8_t f_paired;
-// TODO: test:
 extern volatile uint8_t f_remote_boop;
 extern badge_conf_t badge_conf;
 
