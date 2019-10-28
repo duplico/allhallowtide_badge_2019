@@ -12,6 +12,7 @@
 
 #define BAND_LED_COUNT 4
 #define LEGS_DUR_STEP 14
+#define HEART_COLOR_COUNT 16
 
 #define BAND_TWINKLE_STEPS_FAST 100
 #define BAND_TWINKLE_STEPS_SLOW 400
@@ -47,7 +48,9 @@ typedef struct {
 
 extern rgbcolor_t heart_color;
 extern uint8_t heart_state;
+extern uint8_t heart_is_boop;
 extern uint8_t current_ambient_correct;
+extern rgbcolor_t heart_color_options[HEART_COLOR_COUNT];
 
 void leds_timestep();
 void band_start_anim_by_id(uint8_t anim_id, uint8_t anim_type, uint8_t loop, uint8_t ambient);

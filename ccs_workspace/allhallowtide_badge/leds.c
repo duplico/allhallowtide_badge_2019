@@ -49,6 +49,13 @@ rgbdelta_t band_colors_step[BAND_LED_COUNT] = {
         {0, 0, 0},
 };
 
+rgbcolor_t heart_color_options[HEART_COLOR_COUNT] = {
+    {0xff, 0x0, 0x0}, {0xff, 0x46, 0x0}, {0xff, 0x7f, 0x0}, {0x0, 0x40, 0x0},
+    {0x0, 0x0, 0xff}, {0x80, 0x0, 0x80}, {0xff, 0x80, 0xff}, {0x32, 0x66, 0x32},
+    {0x66, 0x66, 0xaa}, {0x4b, 0x0, 0x82}, {0xda, 0x52, 0x20}, {0xc5, 0x20, 0x4},
+    {0xf0, 0x14, 0x3c}, {0x6a, 0x2d, 0xcd}, {0x0, 0x5f, 0xff}, {0xc7, 0xa, 0x85},
+};
+
 /// Does the heart LED need re-display to the LED driver?
 uint8_t heart_dirty = 1;
 /// Does the band display need re-sent to the LED driver?
@@ -64,6 +71,7 @@ rgbdelta_t heart_color_step;
 uint8_t heart_frame_index;
 
 uint8_t heart_state;
+uint8_t heart_is_boop;
 
 uint8_t band_anim_frame;
 uint8_t band_anim_id;
@@ -254,13 +262,22 @@ void leds_timestep() {
     // Handle the heart.
     if (heart_state) {
         if (heart_frame_index == 0 || heart_frame_index == 24) {
-            heart_color_curr.red = heart_color.red << (1 + heart_state / 16);
-            heart_color_curr.green = heart_color.green << (1 + heart_state / 16);
-            heart_color_curr.blue = heart_color.blue << (1 + heart_state / 16);
+            if (heart_is_boop) {
+                heart_color_curr.red = heart_color.red << 6;
+                heart_color_curr.green = heart_color.green << 6;
+                heart_color_curr.blue = heart_color.blue << 6;
+            } else {
+                heart_color_curr.red = heart_color.red << (1 + heart_state / 16);
+                heart_color_curr.green = heart_color.green << (1 + heart_state / 16);
+                heart_color_curr.blue = heart_color.blue << (1 + heart_state / 16);
+            }
             heart_frame_index++;
         } else if (heart_frame_index == 80) {
             heart_frame_index = 0;
             heart_state--;
+            if (!heart_state) {
+                heart_is_boop = 0;
+            }
         } else {
             heart_color_curr.red >>= 1;
             heart_color_curr.green >>= 1;

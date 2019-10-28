@@ -149,7 +149,13 @@ void boop_cb(tSensor* pSensor)
         current_ambient_correct = 5;
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
         if (!heart_state) {
-            // TODO: color
+            // TODO: not this:
+            SYSCFG0 = FRWPPW | DFWP_0;
+//            badge_conf.badge_id++;
+            SYSCFG0 = FRWPPW | DFWP_1;
+
+            heart_is_boop = 1;
+            heart_color = heart_color_options[badge_conf.badge_id % HEART_COLOR_COUNT];
             heart_state = 3;
         }
     }
@@ -226,7 +232,6 @@ int main(void) {
     MAP_CAPT_startTimer();
     MAP_CAPT_enableISR(CAPT_TIMER_INTERRUPT);
 
-
     if (badge_conf.current_band_id >= HEAD_ANIM_COUNT) {
         SYSCFG0 = FRWPPW | DFWP_0;
         badge_conf.current_band_id = 0;
@@ -300,7 +305,7 @@ int main(void) {
                 band_start_anim_by_struct(&meta_newpair_band, 20, 0);
                 set_badge_seen(paired_id);
             }
-            // TODO: pick our heart color based on (badge_conf.badge_id + paired_id) % badges_in_system
+            heart_color = heart_color_options[(badge_conf.badge_id+paired_id) % HEART_COLOR_COUNT];
             heart_state = 127;
 
             f_paired = 0;
