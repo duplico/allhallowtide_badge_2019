@@ -54,15 +54,15 @@ uint8_t fun_base[] = {
         0x87,
         // B119 / BLANK
         // and 7 bits of global brightness correction:
-        0x01,
+        0x10,
         // HERE WE SWITCH TO 7-BIT SPI.
         // The following index is 18:
         0x7F, // unused
-        0x7F, 0x27, 0x7F, // band
-        0x7F, 0x27, 0x7F, // band
-        0x7F, 0x27, 0x7F, // band
-        0x7F, 0x27, 0x7F, // band
-        0x7F, 0x27, 0x7F, // heart
+        0x60, 0x27, 0x7F, // band
+        0x60, 0x27, 0x7F, // band
+        0x60, 0x27, 0x7F, // band
+        0x60, 0x27, 0x7F, // band
+        0x60, 0x27, 0x7F, // heart
 };
 
 /// Start an asynchronous send of the TLC5948S grayscale data.
