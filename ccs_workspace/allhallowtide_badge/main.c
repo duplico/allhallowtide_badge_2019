@@ -111,6 +111,14 @@ void init_io() {
     PM5CTL0 &= ~LOCKLPM5;
 }
 
+/// How many band animations are available?
+uint8_t band_unlocked_count() {
+    if (1 + badge_conf.badge_seen_count / 2 > HEAD_ANIM_COUNT) {
+        return HEAD_ANIM_COUNT;
+    }
+    return 1 + badge_conf.badge_seen_count / 2;
+}
+
 uint8_t badge_seen(uint8_t id) {
     if (badge_conf.badges_seen & (BIT0 << id))
         return 1;
@@ -118,6 +126,8 @@ uint8_t badge_seen(uint8_t id) {
 }
 
 void set_badge_seen(uint8_t id) {
+    uint8_t anim_count_pre;
+    anim_count_pre = band_unlocked_count();
     if (badge_seen(id)) {
         return;
     }
@@ -130,17 +140,11 @@ void set_badge_seen(uint8_t id) {
     SYSCFG0 = FRWPPW | DFWP_1;
     __bis_SR_register(GIE);
 
-    // TODO: Is a new animation allowed, now?
-    // If so, start using it.
-
-}
-
-/// How many band animations are available?
-uint8_t band_unlocked_count() {
-    if (1 + badge_conf.badge_seen_count / 2 > HEAD_ANIM_COUNT) {
-        return HEAD_ANIM_COUNT;
+    // Is a new animation allowed, now? If so, start using it.
+    // TODO: test:
+    if (band_unlocked_count() > anim_count_pre) {
+        band_start_anim_by_id(band_unlocked_count()-1, 0, 0, 1);
     }
-    return 1 + badge_conf.badge_seen_count / 2;
 }
 
 /// Callback for pressing the nose in CapTIvate.
