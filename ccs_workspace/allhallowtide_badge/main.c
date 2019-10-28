@@ -203,7 +203,6 @@ void init_timers() {
 }
 
 int main(void) {
-    // TODO:
     WDTCTL = WDTPW | WDTHOLD;
 
     init_clocks();
@@ -235,6 +234,8 @@ int main(void) {
     }
     band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
 
+    WDTCTL = WDTPW | WDTSSEL__ACLK | WDTIS__32K | WDTCNTCL; // 1 second WDT
+
     uint8_t ohai_state_prev = 0;
     uint8_t ohai_state = 0;
     uint8_t ohai_buildup = 0;
@@ -252,6 +253,9 @@ int main(void) {
         }
 
         if (f_time_loop) {
+            // Pet the dog.
+            WDTCTL = WDTPW | WDTSSEL__ACLK | WDTIS__32K | WDTCNTCL; // 1 second WDT
+
             leds_timestep();
 
             ohai_state_prev = ohai_state;
