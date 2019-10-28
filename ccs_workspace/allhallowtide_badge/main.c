@@ -127,17 +127,20 @@ uint8_t badge_seen(uint8_t id) {
 
 void set_badge_seen(uint8_t id) {
     uint8_t anim_count_pre;
-    anim_count_pre = band_unlocked_count();
-    if (badge_seen(id)) {
+
+    if (badge_seen(id) || id >= 32) {
         return;
     }
+
+    anim_count_pre = band_unlocked_count();
+
     __bic_SR_register(GIE);
 //    // Unlock FRAM access:
-    SYSCFG0 = FRWPPW | DFWP_0;
+    SYSCFG0 = FRWPPW | DFWP_0 | PFWP_1;
     badge_conf.badges_seen |= (BIT0 << id);
     badge_conf.badge_seen_count++;
 //    // Lock FRAM access:
-    SYSCFG0 = FRWPPW | DFWP_1;
+    SYSCFG0 = FRWPPW | DFWP_1 | PFWP_1;
     __bis_SR_register(GIE);
 
     // Is a new animation allowed, now? If so, start using it.
@@ -169,10 +172,9 @@ void eye_cb(tSensor* pSensor)
 {
     if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
     {
-
-        SYSCFG0 = FRWPPW | DFWP_0;
+        SYSCFG0 = FRWPPW | DFWP_0 | PFWP_1;
         badge_conf.current_band_id = (badge_conf.current_band_id + 1) % HEAD_ANIM_COUNT; //band_unlocked_count(); // TODO
-        SYSCFG0 = FRWPPW | DFWP_1;
+        SYSCFG0 = FRWPPW | DFWP_1 | PFWP_1;
 
         band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
     }
@@ -240,10 +242,15 @@ int main(void) {
     MAP_CAPT_enableISR(CAPT_TIMER_INTERRUPT);
 
     if (badge_conf.current_band_id >= HEAD_ANIM_COUNT) {
-        SYSCFG0 = FRWPPW | DFWP_0;
+        SYSCFG0 = FRWPPW | DFWP_0 | PFWP_1;
         badge_conf.current_band_id = 0;
-        SYSCFG0 = FRWPPW | DFWP_1;
+        SYSCFG0 = FRWPPW | DFWP_1 | PFWP_1;
     }
+
+    if (badge_conf.badge_id < 32 && !badge_seen(badge_conf.badge_id)) {
+        set_badge_seen(badge_conf.badge_id);
+    }
+
     band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
 
     WDTCTL = WDTPW | WDTSSEL__ACLK | WDTIS__32K | WDTCNTCL; // 1 second WDT
@@ -254,42 +261,69 @@ int main(void) {
 
     while(1)
     {
-        if (g_bConvTimerFlag == true)
+        // Check whether CapTIvate needs to be serviced.
+        if (g_bConvTimerFlag)
         {
-            //
-            // If it is time to update the button,
-            // update it here with the generic library call.
-            //
-            g_bConvTimerFlag = false;
+            // Service the CapTIvate UI.
             CAPT_updateUI(&g_uiApp);
+
+            g_bConvTimerFlag = false;
         }
 
+        // Check whether the time loop flag has been set; this is our
+        //  main animation and debouncing loop.
         if (f_time_loop) {
-            // Pet the dog.
+            // First off, pat the dog.
             WDTCTL = WDTPW | WDTSSEL__ACLK | WDTIS__32K | WDTCNTCL; // 1 second WDT
 
+            // Service the LED animation timestep.
             leds_timestep();
 
+            // Debounce and service the serial connection detection line,
+            //  jauntily nicknamed the "o hai" signal, which is pulled UP
+            //  internally on our MCU, and therefore is asserted when it
+            //  is brought LOW by the connecting board.
+            // Debounce:
             ohai_state_prev = ohai_state;
             ohai_state = (P2IN & BIT2) ? 1 : 0;
 
+            // If we are in an IDLE state, we're looking for this signal
+            //  to go low. But, because the connectors are fiddly, we'll
+            //  do some fairly aggressive debouncing here.
             if (serial_ll_state == SERIAL_LL_IDLE) {
-                // We're looking for o_hai to go low.
                 if (ohai_state == ohai_state_prev && ohai_state == 0) {
+                    // If the signal is low, and was also low last time
+                    //  we checked, increment ohai_buildup. Once the signal
+                    //  is asserted (low) for enough time loops, we decide
+                    //  that the boards are likely firmly connected, and it's
+                    //  time to transition in our serial state machine.
                     ohai_buildup++;
                     if (ohai_buildup > 120) {
+                        // Bring the serial state machine active.
                         serial_ll_state = SERIAL_LL_OPEN_WAIT;
                         ohai_buildup = 0;
                     }
                 } else {
+                    // Unplugged, or unstable connection; start counting
+                    //  again from 0.
                     ohai_buildup = 0;
                 }
             } else {
+                // If we're not in SERIAL_LL_IDLE, we are either in OPEN_WAIT
+                //  or in PAIRED. In either case, we are monitoring for the
+                //  other board to be unplugged. In this case, we're not really
+                //  debouncing aggressively, because basically any change at
+                //  all in the signal means they are no longer firmly plugged
+                //  into each other.
                 // We're looking for o_hai to go high.
                 if (ohai_state == ohai_state_prev && ohai_state == 1) {
                     // unplugged
                     serial_ll_state = SERIAL_LL_IDLE;
                 } else {
+                    // If the connection is still stable, tell the serial
+                    //  system that there's been another "timeout" (which is
+                    //  really more of a timeSTEP than a timeOUT, but needs to
+                    //  be serviced regardless.
                     serial_timeout();
                 }
 
@@ -297,6 +331,7 @@ int main(void) {
                 if (heart_state)
                     heart_state = 127;
             }
+
 
             f_time_loop = 0;
         }
@@ -330,13 +365,14 @@ int main(void) {
 // NB: In the below ISRs, for historical reasons, the vectors are named
 //      in a confusing way.
 //
-// **** TL;DR: Timer A0 is TIMER0_Axxxx; Timer A1 is TIMER1_Axxxx.
+// **** TL;DR: Timer A0 is TIMER0_A0_xxx; Timer A1 is TIMER1_A0_xxx.
 //
 //     This is, apparently, because originally devices only had a single
 //      Timer A, Timer B, etc. So, the CCR registers' index determined
 //      the major number: TIMER_A0 (Timer A, CCR0); TIMER_A1 (Timer A, CCR1),
 //      etc. But now, devices like this one have multiple Timer As. So,
-//      the naming convention must be Timer0_A... for Timer A0.
+//      the naming convention must be Timer0_A... for Timer A0, and
+//      Timer1_A... for A1, etc.
 //     Anyway, that's why it looks like this.
 
 // Dedicated ISR for CCR0. Vector is cleared on service.
@@ -349,7 +385,7 @@ __interrupt void TIMER0_A0_ISR_HOOK(void)
 
 // Dedicated ISR for CCR0. Vector is cleared on service.
 #pragma vector=TIMER1_A0_VECTOR
-__attribute__((ramfunc))__interrupt void TIMER1_A0_ISR_HOOK(void)
+__attribute__((ramfunc)) __interrupt void TIMER1_A0_ISR_HOOK(void)
 {
     P1OUT ^= BIT3;
 }
