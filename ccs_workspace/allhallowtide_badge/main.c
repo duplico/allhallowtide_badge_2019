@@ -148,6 +148,9 @@ void boop_cb(tSensor* pSensor)
 {
     if(!pSensor || ((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))) {
         current_ambient_correct = 5;
+        if (serial_ll_state == SERIAL_LL_PAIRED) {
+            UCA0TXBUF = REMOTE_BOOP_MSG;
+        }
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
         if (!heart_state) {
             heart_is_boop = 1;

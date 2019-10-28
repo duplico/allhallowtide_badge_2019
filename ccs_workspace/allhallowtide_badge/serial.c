@@ -83,6 +83,10 @@ __interrupt void serial_isr() {
                 // Send an ACK.
                 UCA0TXBUF = (BIT6 | badge_conf.badge_id);
             }
+            if (buffer == REMOTE_BOOP_MSG) {
+                f_remote_boop = 1;
+                LPM0_EXIT;
+            }
             break;
         }
         break;
