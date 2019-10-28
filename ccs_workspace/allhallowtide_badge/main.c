@@ -151,7 +151,7 @@ void boop_cb(tSensor* pSensor)
         if (!heart_state) {
             // TODO: not this:
             SYSCFG0 = FRWPPW | DFWP_0;
-//            badge_conf.badge_id++;
+            badge_conf.badge_id++;
             SYSCFG0 = FRWPPW | DFWP_1;
 
             heart_is_boop = 1;
@@ -167,7 +167,7 @@ void eye_cb(tSensor* pSensor)
     {
 
         SYSCFG0 = FRWPPW | DFWP_0;
-        badge_conf.current_band_id = (badge_conf.current_band_id + 1) % band_unlocked_count();
+        badge_conf.current_band_id = (badge_conf.current_band_id + 1) % HEAD_ANIM_COUNT; //band_unlocked_count(); // TODO
         SYSCFG0 = FRWPPW | DFWP_1;
 
         band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);

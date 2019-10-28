@@ -6,7 +6,7 @@ COLOR_SCALE_FACTOR = 1.0
 
 color_corrections = {
     "default" : (40,240,178),
-    "white" : (255,128,255),
+    # "white" : (255,128,255),
     "off" : (0,0,0),
     "pink" : (240, 20, 60),
     "bipink" : (0xff, 0, 0xb0),
