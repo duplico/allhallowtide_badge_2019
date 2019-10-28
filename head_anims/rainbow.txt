@@ -1,5 +1,5 @@
 1 red
-2 orange
+2 darkorange
 3 yellow
 4 green
 5 blue

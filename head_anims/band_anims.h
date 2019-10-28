@@ -28,6 +28,12 @@ extern const uint16_t meta_boop_band_fade_durs[];
 extern const band_animation_t meta_boop_band;
 extern const band_animation_t *meta_boop_anim_set[1];
 // frames for the band:
+extern const rgbcolor_t meta_heartcolors_band_frames[][4];
+extern const uint16_t meta_heartcolors_band_durations[];
+extern const uint16_t meta_heartcolors_band_fade_durs[];
+extern const band_animation_t meta_heartcolors_band;
+extern const band_animation_t *meta_heartcolors_anim_set[1];
+// frames for the band:
 extern const rgbcolor_t meta_newpair_band_frames[][4];
 extern const uint16_t meta_newpair_band_durations[];
 extern const uint16_t meta_newpair_band_fade_durs[];
@@ -70,7 +76,7 @@ extern const uint16_t zflag_trans_band_fade_durs[];
 extern const band_animation_t zflag_trans_band;
 extern const band_animation_t *zflag_trans_anim_set[1];
 #define HEAD_ANIM_COUNT 7
-#define HEAD_ANIM_COUNT_INCL_META 10
+#define HEAD_ANIM_COUNT_INCL_META 11
 #define HEAD_ANIM_FIRE 0
 #define HEAD_ANIM_GEEK_GIRL 1
 #define HEAD_ANIM_RAINBOW 2
@@ -79,8 +85,9 @@ extern const band_animation_t *zflag_trans_anim_set[1];
 #define HEAD_ANIM_ZFLAG_LEATHER 5
 #define HEAD_ANIM_ZFLAG_TRANS 6
 #define HEAD_ANIM_META_BOOP 7
-#define HEAD_ANIM_META_NEWPAIR 8
-#define HEAD_ANIM_META_PAIR 9
+#define HEAD_ANIM_META_HEARTCOLORS 8
+#define HEAD_ANIM_META_NEWPAIR 9
+#define HEAD_ANIM_META_PAIR 10
 #define ANIM_TYPE_FASTTWINKLE 0
 #define ANIM_TYPE_SOLID 1
 #define ANIM_TYPE_SLOWTWINKLE 2
