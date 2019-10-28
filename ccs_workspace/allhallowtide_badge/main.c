@@ -261,10 +261,23 @@ int main(void) {
                 }
 
                 // Keep the heart on full until unplug.
-                heart_state = 127;
+                if (heart_state)
+                    heart_state = 127;
             }
 
             f_time_loop = 0;
+        }
+
+        if (f_paired) {
+            if (badge_seen(paired_id)) {
+                // do the already-seen thing
+            } else {
+                // do the NEW thing
+            }
+            // TODO: pick our heart color based on (badge_conf.badge_id + paired_id) % badges_in_system
+            heart_state = 127;
+
+            f_paired = 0;
         }
 
         __bis_SR_register(LPM0_bits);
