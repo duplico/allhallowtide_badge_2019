@@ -41,7 +41,7 @@ void init_clocks() {
     //  Let's bring this up to 8 MHz or so.
 
     // Configure FRAM wait state (set to 1 to support 16MHz MCLK)
-    FRAMCtl_configureWaitStateControl(FRAMCTL_ACCESS_TIME_CYCLES_1);
+    FRCTL0 = FRCTLPW | NWAITS_1;
 
     __bis_SR_register(SCG0);                // disable FLL
     CSCTL3 |= SELREF__REFOCLK;              // Set REFO as FLL reference source
@@ -146,7 +146,7 @@ uint8_t band_unlocked_count() {
 void boop_cb(tSensor* pSensor)
 {
     if(!pSensor || ((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))) {
-        current_ambient_correct = 4;
+        current_ambient_correct = 5;
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
         if (!heart_state) {
             // TODO: color
@@ -168,18 +168,7 @@ void eye_cb(tSensor* pSensor)
     }
 }
 
-int main(void) {
-    // TODO:
-    WDTCTL = WDTPW | WDTHOLD;
-
-    init_clocks();
-    init_io();
-
-    __bis_SR_register(GIE);
-    tlc_init();
-    serial_init();
-
-    // TODO: Refactor to another function.
+void init_timers() {
     // For our timer, we're going to use ACLK, which is sourced from REFO.
     //  (REFO is 32k)
     // We'd like to have this run at like 60-100 Hz, I think.
@@ -211,6 +200,20 @@ int main(void) {
         Timer_A_initUpMode(TIMER_A1_BASE, &next_channel_timer_init);
         Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
     }
+}
+
+int main(void) {
+    // TODO:
+    WDTCTL = WDTPW | WDTHOLD;
+
+    init_clocks();
+    init_io();
+    init_timers();
+
+    __bis_SR_register(GIE);
+    tlc_init();
+    current_ambient_correct = 1;
+    serial_init();
 
     tlc_stage_blank(0);
     tlc_set_fun();
@@ -285,11 +288,11 @@ int main(void) {
         if (f_paired) {
             if (badge_seen(paired_id)) {
                 // do the already-seen thing
-                current_ambient_correct = 1;
+                current_ambient_correct = 2;
                 band_start_anim_by_struct(&meta_pair_band, 10, 0);
             } else {
                 // do the NEW thing
-                current_ambient_correct = 6;
+                current_ambient_correct = 7;
                 band_start_anim_by_struct(&meta_newpair_band, 20, 0);
                 set_badge_seen(paired_id);
             }

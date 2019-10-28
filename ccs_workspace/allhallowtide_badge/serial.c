@@ -42,12 +42,7 @@ void serial_init() {
 }
 
 void serial_send_pair() {
-    // TODO: Do we need a sync byte or something?
     UCA0TXBUF = (BIT7 | badge_conf.badge_id);
-}
-
-void serial_send_pair_ack() {
-    UCA0TXBUF = (BIT6 | badge_conf.badge_id);
 }
 
 void serial_timeout() {

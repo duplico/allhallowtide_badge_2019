@@ -54,7 +54,6 @@ uint8_t heart_dirty = 1;
 /// Does the band display need re-sent to the LED driver?
 uint8_t band_dirty = 1;
 
-// TODO: Refactor this out:
 uint8_t band_animation_state = 0;
 
 rgbcolor16_t heart_color_curr;
@@ -80,7 +79,6 @@ uint16_t band_transition_steps;
 uint16_t band_transition_index;
 const band_animation_t *band_current_anim;
 
-// TODO: Use this to configure the brightness:
 uint8_t current_ambient_correct;
 uint8_t previous_ambient_correct;
 
@@ -96,7 +94,6 @@ void band_load_colors() {
     // leg_colors_curr <- tentacle_current_anim[tentacle_anim_index]
 
     // Stage in the current color:
-//    memcpy(band_colors_curr, band_current_anim->colors[band_anim_frame], sizeof(rgbcolor_t)*BAND_LED_COUNT); // TODO
     for (uint8_t i=0; i<BAND_LED_COUNT; i++) {
         band_colors_curr[i].red = band_current_anim->colors[band_anim_frame][i].red * 5;
         band_colors_curr[i].green = band_current_anim->colors[band_anim_frame][i].green * 5;
@@ -132,34 +129,12 @@ inline void band_fade_colors() {
     } else {
         for (uint8_t i = 0; i < BAND_LED_COUNT; i++)
         {
-            // TODO: Check how well this works:
             band_colors_curr[i].red += band_colors_step[i].red;
             band_colors_curr[i].green += band_colors_step[i].green;
             band_colors_curr[i].blue += band_colors_step[i].blue;
         }
     }
 }
-
-// TODO:
-//void eye_twinkle_off() {
-//    eye_twinkle_bits = 0xffffffffffffffff;
-//    eyes_twinkling = 0;
-//    set_face(face_curr); // Dirty face.
-//}
-//
-//void eye_twinkle_on() {
-//    eyes_twinkling = 1;
-//    face_anim_adj_index = 0;
-//}
-//
-//void tentacle_wiggle() {
-//    uint8_t wiggle_mask_temp = 0xff;
-//    if (band_current_anim->wiggle) {
-//        wiggle_mask_temp &= ~(1 << (rand() % 4));
-//        if (rand() % 2) wiggle_mask_temp &= ~(1 << (rand() % 4));
-//    }
-//    wiggle_mask = wiggle_mask_temp;
-//}
 
 /// Actually apply the appropriate colors to our grayscale values.
 /**
@@ -172,9 +147,9 @@ void set_band_gs(const rgbcolor16_t* band_colors) {
 
     for (uint8_t flower_index = 0; flower_index < BAND_LED_COUNT; flower_index++)
     {
-        r = band_colors[flower_index].red << 1;
-        g = band_colors[flower_index].green << 1;
-        b = band_colors[flower_index].blue << 1;
+        r = band_colors[flower_index].red << current_ambient_correct;
+        g = band_colors[flower_index].green << current_ambient_correct;
+        b = band_colors[flower_index].blue << current_ambient_correct;
 
         if (band_current_anim->anim_type == ANIM_TYPE_FASTTWINKLE) {
             if (band_twinkle_bits & (1 << flower_index)) {
@@ -183,11 +158,6 @@ void set_band_gs(const rgbcolor16_t* band_colors) {
                 b = b >> 2;
             }
         }
-
-        // TODO:
-        r = r << current_ambient_correct;
-        g = g << current_ambient_correct;
-        b = b << current_ambient_correct;
 
         if (r>UINT16_MAX) r=UINT16_MAX;
         if (g>UINT16_MAX) g=UINT16_MAX;
@@ -200,10 +170,8 @@ void set_band_gs(const rgbcolor16_t* band_colors) {
 }
 
 void band_set_steps_and_go() {
-    // TODO: Modify this as appropriate:
     band_hold_steps = band_current_anim->durations[band_anim_frame] / LEGS_DUR_STEP;
     band_hold_index = 0;
-    // TODO: And this:
     band_transition_steps = band_current_anim->fade_durs[band_anim_frame] / LEGS_DUR_STEP;
     band_transition_index = 0;
 
@@ -269,9 +237,8 @@ void band_next_anim_frame() {
             band_anim_looping--;
         } else { // not ambient, no loops remaining
             band_is_ambient = 1; // Now we're back to being ambient...
-            current_ambient_correct = 0;
+            current_ambient_correct = 1;
             band_start_anim_by_id(band_saved_anim_id, band_saved_anim_type, 0, 1);
-            // TODO: Do any additional needs for the completion of a non-ambient animation.
             return; // skip the transitions_and_go because that's called in start_anim.
         }
     }
@@ -309,7 +276,6 @@ void leds_timestep() {
     }
 
     if (heart_dirty) {
-        // TODO: Set up the display in tlc_gs.
         tlc_gs[3] = heart_color_curr.red;
         tlc_gs[2] = heart_color_curr.green;
         tlc_gs[1] = heart_color_curr.blue;
