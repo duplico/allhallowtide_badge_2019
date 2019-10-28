@@ -108,23 +108,18 @@ void tlc_init() {
     tlc_stage_blank(1);
 
     // Configure the eUSCI.
-    UCB0CTLW0 |= UCSWRST;  // Shut down USCI_B0,
+    UCB0CTLW0 = UCSWRST;  // Shut down USCI_B0 and clear CTLW0.
 
-    // TODO: Get rid of driverlib here if possible.
+    UCB0CTLW0 |= UCCKPH_1; // Capture on first, change on next
+    UCB0CTLW0 |= UCCKPL_0; // Idle LOW polarity
+    UCB0CTLW0 |= UCMSB_1; // MSB first.
+    UCB0CTLW0 |= UCSYNC_1; // SYNCHRONOUS mode (SPI)
+    UCB0CTLW0 |= UCSSEL_2; // SMCLK source
+    UCB0CTLW0 |= UCMST_1; // Master mode.
 
-    // And USCI_B0 peripheral:
-    EUSCI_B_SPI_initMasterParam ini = {0};
-    ini.clockPhase = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
-    ini.clockPolarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
-    ini.clockSourceFrequency = 8000000;
-    ini.desiredSpiClock = 2000000;
-    ini.msbFirst = EUSCI_B_SPI_MSB_FIRST;
-    ini.selectClockSource = EUSCI_B_SPI_CLOCKSOURCE_SMCLK;
-    ini.spiMode = EUSCI_B_SPI_3PIN;
-    EUSCI_B_SPI_initMaster(EUSCI_B0_BASE, &ini);
+    UCB0BRW = 0x04; // Baudrate is SMCLK/4
 
-    UCB0CTLW0 &= ~UC7BIT;  //  put it in 8-bit mode out of caution.
-    UCB0CTLW0 &= ~UCSWRST; //  and enable it.
+    UCB0CTLW0 &= ~UCSWRST; // enable it.
 
     // Clear and enable UCB0 TX interrupt
     UCB0IFG &= ~UCTXIFG;
