@@ -13,6 +13,7 @@
 #define SERIAL_LL_PAIRED 2
 
 extern volatile uint8_t serial_ll_state;
+extern volatile uint8_t paired_id;
 
 void serial_timeout();
 void serial_init();
