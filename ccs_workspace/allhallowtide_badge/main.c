@@ -135,6 +135,7 @@ void set_badge_seen(uint8_t id) {
 
 }
 
+/// How many band animations are available?
 uint8_t band_unlocked_count() {
     if (1 + badge_conf.badge_seen_count / 2 > HEAD_ANIM_COUNT) {
         return HEAD_ANIM_COUNT;
@@ -142,6 +143,7 @@ uint8_t band_unlocked_count() {
     return 1 + badge_conf.badge_seen_count / 2;
 }
 
+/// Callback for pressing the nose in CapTIvate.
 void boop_cb(tSensor* pSensor)
 {
     if(!pSensor || ((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))) {
@@ -155,6 +157,7 @@ void boop_cb(tSensor* pSensor)
     }
 }
 
+/// Callback for pressing the eye in CapTIvate.
 void eye_cb(tSensor* pSensor)
 {
     if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
@@ -168,6 +171,7 @@ void eye_cb(tSensor* pSensor)
     }
 }
 
+/// Initialize the timer for (a) LED frames, and (b) LED GSCLK.
 void init_timers() {
     // For our timer, we're going to use ACLK, which is sourced from REFO.
     //  (REFO is 32k)
@@ -200,6 +204,7 @@ void init_timers() {
     Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
 }
 
+/// Make snafucated.
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;
 
