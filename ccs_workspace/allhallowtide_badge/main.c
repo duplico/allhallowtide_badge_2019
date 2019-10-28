@@ -211,6 +211,9 @@ void init_timers() {
     Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
 }
 
+// TODO: "white" isn't quite white
+// TODO: final animations
+
 /// Make snafucated.
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;
