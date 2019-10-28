@@ -10,8 +10,12 @@
 #include "badge.h"
 #include "serial.h"
 
+extern tSensor BTN1_BOOP;
+extern tSensor BTN3_EYE;
+
 volatile uint8_t f_time_loop;
 volatile uint8_t f_paired;
+volatile uint8_t f_remote_boop;
 
 /// Initialize clock signals and the three system clocks.
 /**
@@ -108,7 +112,16 @@ void init_io() {
 #pragma NOINIT(badge_conf)
 badge_conf_t badge_conf;
 
+uint8_t badge_seen(uint8_t id) {
+    if (badge_conf.badges_seen & (BIT0 << id))
+        return 1;
+    return 0;
+}
+
 void set_badge_seen(uint8_t id) {
+    if (badge_seen(id)) {
+        return;
+    }
     __bic_SR_register(GIE);
 //    // Unlock FRAM access:
     SYSCFG0 = FRWPPW | DFWP_0;
@@ -117,10 +130,10 @@ void set_badge_seen(uint8_t id) {
 //    // Lock FRAM access:
     SYSCFG0 = FRWPPW | DFWP_1;
     __bis_SR_register(GIE);
-}
 
-uint8_t badge_seen(uint8_t id) {
-    return badge_conf.badges_seen & BIT0 << id;
+    // TODO: Is a new animation allowed, now?
+    // If so, start using it.
+
 }
 
 uint8_t band_unlocked_count() {
@@ -130,14 +143,9 @@ uint8_t band_unlocked_count() {
     return 1 + badge_conf.badge_seen_count / 2;
 }
 
-// TODO:
-extern tSensor BTN1_BOOP;
-extern tSensor BTN3_EYE;
-
 void boop_cb(tSensor* pSensor)
 {
-    if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
-    {
+    if(!pSensor || ((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))) {
         current_ambient_correct = 4;
         band_start_anim_by_struct(&meta_boop_band, 0, 0);
         if (!heart_state) {
@@ -161,7 +169,7 @@ void eye_cb(tSensor* pSensor)
 }
 
 int main(void) {
-
+    // TODO:
     WDTCTL = WDTPW | WDTHOLD;
 
     init_clocks();
@@ -209,7 +217,6 @@ int main(void) {
 
     CAPT_initUI(&g_uiApp);
     CAPT_calibrateUI(&g_uiApp);
-//    g_uiApp.ui8AppLPM = 0; // No LPM, keep MCLK on. TODO
     MAP_CAPT_registerCallback(&BTN1_BOOP, &boop_cb);
     MAP_CAPT_registerCallback(&BTN3_EYE, &eye_cb);
     MAP_CAPT_selectTimerSource(CAPT_TIMER_SRC_ACLK);
@@ -227,6 +234,7 @@ int main(void) {
 
     uint8_t ohai_state_prev = 0;
     uint8_t ohai_state = 0;
+    uint8_t ohai_buildup = 0;
 
     while(1)
     {
@@ -249,7 +257,13 @@ int main(void) {
             if (serial_ll_state == SERIAL_LL_IDLE) {
                 // We're looking for o_hai to go low.
                 if (ohai_state == ohai_state_prev && ohai_state == 0) {
-                    serial_ll_state = SERIAL_LL_OPEN_WAIT;
+                    ohai_buildup++;
+                    if (ohai_buildup > 120) {
+                        serial_ll_state = SERIAL_LL_OPEN_WAIT;
+                        ohai_buildup = 0;
+                    }
+                } else {
+                    ohai_buildup = 0;
                 }
             } else {
                 // We're looking for o_hai to go high.
@@ -271,13 +285,23 @@ int main(void) {
         if (f_paired) {
             if (badge_seen(paired_id)) {
                 // do the already-seen thing
+                current_ambient_correct = 1;
+                band_start_anim_by_struct(&meta_pair_band, 10, 0);
             } else {
                 // do the NEW thing
+                current_ambient_correct = 6;
+                band_start_anim_by_struct(&meta_newpair_band, 20, 0);
+                set_badge_seen(paired_id);
             }
             // TODO: pick our heart color based on (badge_conf.badge_id + paired_id) % badges_in_system
             heart_state = 127;
 
             f_paired = 0;
+        }
+
+        if (f_remote_boop) {
+            boop_cb(0);
+            f_remote_boop = 0;
         }
 
         __bis_SR_register(LPM0_bits);

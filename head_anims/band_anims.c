@@ -70,6 +70,38 @@ const band_animation_t meta_boop_band = {meta_boop_band_frames, meta_boop_band_d
 
 const band_animation_t *meta_boop_anim_set[1] = {&meta_boop_band};
 
+///////////////// META_NEWPAIR:
+// frames for the band:
+const rgbcolor_t meta_newpair_band_frames[][4] = {
+    {{0xff, 0x80, 0xff}, {0xda, 0x52, 0x20}, {0xff, 0x80, 0xff}, {0xb2, 0x11, 0x22}},
+    {{0xff, 0x80, 0xff}, {0x20, 0x59, 0xaa}, {0x80, 0x0, 0x80}, {0xb2, 0x11, 0x22}},
+    {{0xff, 0x80, 0xff}, {0xda, 0x52, 0x20}, {0xff, 0x80, 0xff}, {0x20, 0x59, 0xaa}},
+    {{0xb2, 0x11, 0x22}, {0xff, 0x80, 0xff}, {0x20, 0x59, 0xaa}, {0x80, 0x0, 0x80}},
+    {{0x80, 0x0, 0x80}, {0xff, 0x80, 0xff}, {0xff, 0x80, 0xff}, {0xb2, 0x11, 0x22}},
+};
+const uint16_t meta_newpair_band_durations[] = {1, 1, 1, 1, 1};
+const uint16_t meta_newpair_band_fade_durs[] = {45, 45, 45, 45, 45};
+// the animation:
+const band_animation_t meta_newpair_band = {meta_newpair_band_frames, meta_newpair_band_durations, meta_newpair_band_fade_durs, 5, ANIM_TYPE_SOLID, 26};
+
+const band_animation_t *meta_newpair_anim_set[1] = {&meta_newpair_band};
+
+///////////////// META_PAIR:
+// frames for the band:
+const rgbcolor_t meta_pair_band_frames[][4] = {
+    {{0x22, 0x45, 0x22}, {0xa5, 0x15, 0x2a}, {0x0, 0x40, 0x0}, {0xff, 0x52, 0x0}},
+    {{0x22, 0x45, 0x22}, {0x20, 0x59, 0xaa}, {0x80, 0x0, 0x80}, {0xff, 0x52, 0x0}},
+    {{0x0, 0x40, 0x0}, {0xa5, 0x15, 0x2a}, {0x22, 0x45, 0x22}, {0x20, 0x59, 0xaa}},
+    {{0xff, 0x52, 0x0}, {0x22, 0x45, 0x22}, {0x20, 0x59, 0xaa}, {0x80, 0x0, 0x80}},
+    {{0x80, 0x0, 0x80}, {0x22, 0x45, 0x22}, {0x0, 0x40, 0x0}, {0xff, 0x52, 0x0}},
+};
+const uint16_t meta_pair_band_durations[] = {1, 1, 1, 1, 1};
+const uint16_t meta_pair_band_fade_durs[] = {45, 45, 45, 45, 45};
+// the animation:
+const band_animation_t meta_pair_band = {meta_pair_band_frames, meta_pair_band_durations, meta_pair_band_fade_durs, 5, ANIM_TYPE_SOLID, 26};
+
+const band_animation_t *meta_pair_anim_set[1] = {&meta_pair_band};
+
 ///////////////// RAINBOW:
 // frames for the band:
 const rgbcolor_t rainbow_band_frames[][4] = {
@@ -162,4 +194,4 @@ const band_animation_t zflag_trans_band = {zflag_trans_band_frames, zflag_trans_
 
 const band_animation_t *zflag_trans_anim_set[1] = {&zflag_trans_band};
 
-const band_animation_t **legs_all_anim_sets[] = {fire_anim_set, geek_girl_anim_set, rainbow_anim_set, zflag_bear_anim_set, zflag_bi_anim_set, zflag_leather_anim_set, zflag_trans_anim_set, meta_boop_anim_set};
+const band_animation_t **legs_all_anim_sets[] = {fire_anim_set, geek_girl_anim_set, rainbow_anim_set, zflag_bear_anim_set, zflag_bi_anim_set, zflag_leather_anim_set, zflag_trans_anim_set, meta_boop_anim_set, meta_newpair_anim_set, meta_pair_anim_set};
