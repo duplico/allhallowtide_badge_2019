@@ -160,8 +160,7 @@ __interrupt void EUSCI_B0_ISR(void)
                 UCB0CTLW0 |= UCSWRST;
                 UCB0CTLW0 |= UC7BIT;
                 UCB0CTLW0 &= ~UCSWRST;
-//                UCB0IFG &= ~UCTXIFG; // TODO
-                EUSCI_B_SPI_clearInterrupt(EUSCI_B0_BASE, EUSCI_B_SPI_TRANSMIT_INTERRUPT);
+                UCB0IFG &= ~UCTXIFG;
                 UCB0IE |= UCTXIE;
             } else if (tlc_tx_index == 34) {
                 P1OUT |= BIT0; P1OUT &= ~BIT0; // Pulse LAT
@@ -169,8 +168,7 @@ __interrupt void EUSCI_B0_ISR(void)
                 UCB0CTLW0 |= UCSWRST;
                 UCB0CTLW0 &= ~UC7BIT;
                 UCB0CTLW0 &= ~UCSWRST;
-//                UCB0IFG &= ~UCTXIFG; // TODO
-                EUSCI_B_SPI_clearInterrupt(EUSCI_B0_BASE, EUSCI_B_SPI_TRANSMIT_INTERRUPT);
+                UCB0IFG &= ~UCTXIFG;
                 UCB0IE |= UCTXIE;
                 tlc_send_type = TLC_SEND_IDLE;
                 return;
