@@ -113,10 +113,14 @@ void init_io() {
 
 /// How many band animations are available?
 uint8_t band_unlocked_count() {
-    if (1 + badge_conf.badge_seen_count / 2 > HEAD_ANIM_COUNT) {
+    // You start with 2, and get a new one for every badge you pair with.
+    // But, your own badge ID number is counted as "seen", so really you
+    // start with 1:
+    if ((1 + badge_conf.badge_seen_count) > HEAD_ANIM_COUNT) {
         return HEAD_ANIM_COUNT;
     }
-    return 1 + badge_conf.badge_seen_count / 2;
+
+    return 1 + badge_conf.badge_seen_count;
 }
 
 uint8_t badge_seen(uint8_t id) {
@@ -144,7 +148,6 @@ void set_badge_seen(uint8_t id) {
     __bis_SR_register(GIE);
 
     // Is a new animation allowed, now? If so, start using it.
-    // TODO: test:
     if (band_unlocked_count() > anim_count_pre) {
         band_start_anim_by_id(band_unlocked_count()-1, 0, 0, 1);
     }
@@ -173,7 +176,7 @@ void eye_cb(tSensor* pSensor)
     if((pSensor->bSensorTouch == true) && (pSensor->bSensorPrevTouch == false))
     {
         SYSCFG0 = FRWPPW | DFWP_0 | PFWP_1;
-        badge_conf.current_band_id = (badge_conf.current_band_id + 1) % HEAD_ANIM_COUNT; //band_unlocked_count(); // TODO
+        badge_conf.current_band_id = (badge_conf.current_band_id + 1) % band_unlocked_count();
         SYSCFG0 = FRWPPW | DFWP_1 | PFWP_1;
 
         band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
@@ -212,9 +215,6 @@ void init_timers() {
     Timer_A_initUpMode(TIMER_A1_BASE, &next_channel_timer_init);
     Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
 }
-
-// TODO: "white" isn't quite white
-// TODO: final animations
 
 /// Make snafucated.
 int main(void) {
