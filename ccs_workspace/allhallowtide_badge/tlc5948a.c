@@ -118,7 +118,6 @@ void tlc_init() {
     ini.clockPolarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
     ini.clockSourceFrequency = 8000000;
     ini.desiredSpiClock = 2000000;
-//    ini.desiredSpiClock = 57600;
     ini.msbFirst = EUSCI_B_SPI_MSB_FIRST;
     ini.selectClockSource = EUSCI_B_SPI_CLOCKSOURCE_SMCLK;
     ini.spiMode = EUSCI_B_SPI_3PIN;
