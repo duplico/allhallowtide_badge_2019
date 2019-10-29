@@ -153,7 +153,7 @@ void set_band_gs(const rgbcolor16_t* band_colors) {
         g = band_colors[flower_index].green << current_ambient_correct;
         b = band_colors[flower_index].blue << current_ambient_correct;
 
-        if (band_current_anim->anim_type == ANIM_TYPE_FASTTWINKLE) {
+        if (band_current_anim->anim_type != ANIM_TYPE_SOLID) {
             if (band_twinkle_bits & (1 << flower_index)) {
                 r = r >> 2;
                 g = g >> 2;
@@ -302,6 +302,8 @@ void leds_timestep() {
             band_twinkle_bits = rand() % 256;
             band_anim_adjustment_index = 0;
             band_dirty = 1;
+        } else {
+            band_anim_adjustment_index++;
         }
     }
 
