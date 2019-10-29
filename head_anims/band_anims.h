@@ -60,10 +60,10 @@ extern const uint16_t h09wiggle_band_durations[];
 extern const uint16_t h09wiggle_band_fade_durs[];
 extern const band_animation_t h09wiggle;
 // frames for the band:
-extern const rgbcolor_t h10zflag_bi_band_frames[][4];
-extern const uint16_t h10zflag_bi_band_durations[];
-extern const uint16_t h10zflag_bi_band_fade_durs[];
-extern const band_animation_t h10zflag_bi;
+extern const rgbcolor_t h10white_band_frames[][4];
+extern const uint16_t h10white_band_durations[];
+extern const uint16_t h10white_band_fade_durs[];
+extern const band_animation_t h10white;
 // frames for the band:
 extern const rgbcolor_t h11rainbow2_band_frames[][4];
 extern const uint16_t h11rainbow2_band_durations[];
@@ -96,14 +96,13 @@ extern const band_animation_t meta_pair;
 #define HEAD_ANIM_H07PAN 7
 #define HEAD_ANIM_H08ZFLAG_BEAR 8
 #define HEAD_ANIM_H09WIGGLE 9
-#define HEAD_ANIM_H10ZFLAG_BI 10
+#define HEAD_ANIM_H10WHITE 10
 #define HEAD_ANIM_H11RAINBOW2 11
 #define HEAD_ANIM_META_BOOP 12
 #define HEAD_ANIM_META_NEWPAIR 13
 #define HEAD_ANIM_META_PAIR 14
 #define ANIM_TYPE_SOLID 0
 #define ANIM_TYPE_FASTTWINKLE 1
-#define ANIM_TYPE_SLOWTWINKLE 2
-#define LEG_ANIM_TYPE_COUNT 3
+#define LEG_ANIM_TYPE_COUNT 2
 extern const band_animation_t *band_all_anims[15];
 #endif // _H_
