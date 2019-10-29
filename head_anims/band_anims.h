@@ -10,108 +10,100 @@
 #define LEG_ANIM_NONE 211
 
 // frames for the band:
-extern const rgbcolor_t fire_band_frames[][4];
-extern const uint16_t fire_band_durations[];
-extern const uint16_t fire_band_fade_durs[];
-extern const band_animation_t fire_band;
-extern const band_animation_t *fire_anim_set[1];
+extern const rgbcolor_t h00geek_girl_band_frames[][4];
+extern const uint16_t h00geek_girl_band_durations[];
+extern const uint16_t h00geek_girl_band_fade_durs[];
+extern const band_animation_t h00geek_girl;
 // frames for the band:
-extern const rgbcolor_t geek_girl_band_frames[][4];
-extern const uint16_t geek_girl_band_durations[];
-extern const uint16_t geek_girl_band_fade_durs[];
-extern const band_animation_t geek_girl_band;
-extern const band_animation_t *geek_girl_anim_set[1];
+extern const rgbcolor_t h01lagoon_band_frames[][4];
+extern const uint16_t h01lagoon_band_durations[];
+extern const uint16_t h01lagoon_band_fade_durs[];
+extern const band_animation_t h01lagoon;
 // frames for the band:
-extern const rgbcolor_t ice_band_frames[][4];
-extern const uint16_t ice_band_durations[];
-extern const uint16_t ice_band_fade_durs[];
-extern const band_animation_t ice_band;
-extern const band_animation_t *ice_anim_set[1];
+extern const rgbcolor_t h02fire_band_frames[][4];
+extern const uint16_t h02fire_band_durations[];
+extern const uint16_t h02fire_band_fade_durs[];
+extern const band_animation_t h02fire;
 // frames for the band:
-extern const rgbcolor_t lagoon_band_frames[][4];
-extern const uint16_t lagoon_band_durations[];
-extern const uint16_t lagoon_band_fade_durs[];
-extern const band_animation_t lagoon_band;
-extern const band_animation_t *lagoon_anim_set[1];
+extern const rgbcolor_t h03ice_band_frames[][4];
+extern const uint16_t h03ice_band_durations[];
+extern const uint16_t h03ice_band_fade_durs[];
+extern const band_animation_t h03ice;
+// frames for the band:
+extern const rgbcolor_t h04rainbow_band_frames[][4];
+extern const uint16_t h04rainbow_band_durations[];
+extern const uint16_t h04rainbow_band_fade_durs[];
+extern const band_animation_t h04rainbow;
+// frames for the band:
+extern const rgbcolor_t h05zflag_leather_band_frames[][4];
+extern const uint16_t h05zflag_leather_band_durations[];
+extern const uint16_t h05zflag_leather_band_fade_durs[];
+extern const band_animation_t h05zflag_leather;
+// frames for the band:
+extern const rgbcolor_t h06zflag_trans_band_frames[][4];
+extern const uint16_t h06zflag_trans_band_durations[];
+extern const uint16_t h06zflag_trans_band_fade_durs[];
+extern const band_animation_t h06zflag_trans;
+// frames for the band:
+extern const rgbcolor_t h07pan_band_frames[][4];
+extern const uint16_t h07pan_band_durations[];
+extern const uint16_t h07pan_band_fade_durs[];
+extern const band_animation_t h07pan;
+// frames for the band:
+extern const rgbcolor_t h08zflag_bear_band_frames[][4];
+extern const uint16_t h08zflag_bear_band_durations[];
+extern const uint16_t h08zflag_bear_band_fade_durs[];
+extern const band_animation_t h08zflag_bear;
+// frames for the band:
+extern const rgbcolor_t h09wiggle_band_frames[][4];
+extern const uint16_t h09wiggle_band_durations[];
+extern const uint16_t h09wiggle_band_fade_durs[];
+extern const band_animation_t h09wiggle;
+// frames for the band:
+extern const rgbcolor_t h10zflag_bi_band_frames[][4];
+extern const uint16_t h10zflag_bi_band_durations[];
+extern const uint16_t h10zflag_bi_band_fade_durs[];
+extern const band_animation_t h10zflag_bi;
+// frames for the band:
+extern const rgbcolor_t h11rainbow2_band_frames[][4];
+extern const uint16_t h11rainbow2_band_durations[];
+extern const uint16_t h11rainbow2_band_fade_durs[];
+extern const band_animation_t h11rainbow2;
 // frames for the band:
 extern const rgbcolor_t meta_boop_band_frames[][4];
 extern const uint16_t meta_boop_band_durations[];
 extern const uint16_t meta_boop_band_fade_durs[];
-extern const band_animation_t meta_boop_band;
-extern const band_animation_t *meta_boop_anim_set[1];
+extern const band_animation_t meta_boop;
 // frames for the band:
 extern const rgbcolor_t meta_newpair_band_frames[][4];
 extern const uint16_t meta_newpair_band_durations[];
 extern const uint16_t meta_newpair_band_fade_durs[];
-extern const band_animation_t meta_newpair_band;
-extern const band_animation_t *meta_newpair_anim_set[1];
+extern const band_animation_t meta_newpair;
 // frames for the band:
 extern const rgbcolor_t meta_pair_band_frames[][4];
 extern const uint16_t meta_pair_band_durations[];
 extern const uint16_t meta_pair_band_fade_durs[];
-extern const band_animation_t meta_pair_band;
-extern const band_animation_t *meta_pair_anim_set[1];
-// frames for the band:
-extern const rgbcolor_t pan_band_frames[][4];
-extern const uint16_t pan_band_durations[];
-extern const uint16_t pan_band_fade_durs[];
-extern const band_animation_t pan_band;
-extern const band_animation_t *pan_anim_set[1];
-// frames for the band:
-extern const rgbcolor_t rainbow_band_frames[][4];
-extern const uint16_t rainbow_band_durations[];
-extern const uint16_t rainbow_band_fade_durs[];
-extern const band_animation_t rainbow_band;
-extern const band_animation_t *rainbow_anim_set[1];
-// frames for the band:
-extern const rgbcolor_t wiggle_band_frames[][4];
-extern const uint16_t wiggle_band_durations[];
-extern const uint16_t wiggle_band_fade_durs[];
-extern const band_animation_t wiggle_band;
-extern const band_animation_t *wiggle_anim_set[1];
-// frames for the band:
-extern const rgbcolor_t zflag_bear_band_frames[][4];
-extern const uint16_t zflag_bear_band_durations[];
-extern const uint16_t zflag_bear_band_fade_durs[];
-extern const band_animation_t zflag_bear_band;
-extern const band_animation_t *zflag_bear_anim_set[1];
-// frames for the band:
-extern const rgbcolor_t zflag_bi_band_frames[][4];
-extern const uint16_t zflag_bi_band_durations[];
-extern const uint16_t zflag_bi_band_fade_durs[];
-extern const band_animation_t zflag_bi_band;
-extern const band_animation_t *zflag_bi_anim_set[1];
-// frames for the band:
-extern const rgbcolor_t zflag_leather_band_frames[][4];
-extern const uint16_t zflag_leather_band_durations[];
-extern const uint16_t zflag_leather_band_fade_durs[];
-extern const band_animation_t zflag_leather_band;
-extern const band_animation_t *zflag_leather_anim_set[1];
-// frames for the band:
-extern const rgbcolor_t zflag_trans_band_frames[][4];
-extern const uint16_t zflag_trans_band_durations[];
-extern const uint16_t zflag_trans_band_fade_durs[];
-extern const band_animation_t zflag_trans_band;
-extern const band_animation_t *zflag_trans_anim_set[1];
-#define HEAD_ANIM_COUNT 11
-#define HEAD_ANIM_COUNT_INCL_META 14
-#define HEAD_ANIM_FIRE 0
-#define HEAD_ANIM_GEEK_GIRL 1
-#define HEAD_ANIM_ICE 2
-#define HEAD_ANIM_LAGOON 3
-#define HEAD_ANIM_PAN 4
-#define HEAD_ANIM_RAINBOW 5
-#define HEAD_ANIM_WIGGLE 6
-#define HEAD_ANIM_ZFLAG_BEAR 7
-#define HEAD_ANIM_ZFLAG_BI 8
-#define HEAD_ANIM_ZFLAG_LEATHER 9
-#define HEAD_ANIM_ZFLAG_TRANS 10
-#define HEAD_ANIM_META_BOOP 11
-#define HEAD_ANIM_META_NEWPAIR 12
-#define HEAD_ANIM_META_PAIR 13
-#define ANIM_TYPE_FASTTWINKLE 0
-#define ANIM_TYPE_SOLID 1
+extern const band_animation_t meta_pair;
+#define HEAD_ANIM_COUNT 12
+#define HEAD_ANIM_COUNT_INCL_META 15
+#define HEAD_ANIM_H00GEEK_GIRL 0
+#define HEAD_ANIM_H01LAGOON 1
+#define HEAD_ANIM_H02FIRE 2
+#define HEAD_ANIM_H03ICE 3
+#define HEAD_ANIM_H04RAINBOW 4
+#define HEAD_ANIM_H05ZFLAG_LEATHER 5
+#define HEAD_ANIM_H06ZFLAG_TRANS 6
+#define HEAD_ANIM_H07PAN 7
+#define HEAD_ANIM_H08ZFLAG_BEAR 8
+#define HEAD_ANIM_H09WIGGLE 9
+#define HEAD_ANIM_H10ZFLAG_BI 10
+#define HEAD_ANIM_H11RAINBOW2 11
+#define HEAD_ANIM_META_BOOP 12
+#define HEAD_ANIM_META_NEWPAIR 13
+#define HEAD_ANIM_META_PAIR 14
+#define ANIM_TYPE_SOLID 0
+#define ANIM_TYPE_FASTTWINKLE 1
 #define ANIM_TYPE_SLOWTWINKLE 2
 #define LEG_ANIM_TYPE_COUNT 3
-extern const band_animation_t **legs_all_anim_sets[];
+extern const band_animation_t *band_all_anims[15];
 #endif // _H_
