@@ -149,7 +149,7 @@ void set_badge_seen(uint8_t id) {
 
     // Is a new animation allowed, now? If so, start using it.
     if (band_unlocked_count() > anim_count_pre) {
-        band_start_anim_by_id(band_unlocked_count()-1, 0, 0, 1);
+        band_start_anim_by_id(band_unlocked_count()-1, 0, 1);
     }
 }
 
@@ -161,7 +161,7 @@ void boop_cb(tSensor* pSensor)
         if (serial_ll_state == SERIAL_LL_PAIRED) {
             UCA0TXBUF = REMOTE_BOOP_MSG;
         }
-        band_start_anim_by_struct(&meta_boop_band, 0, 0);
+        band_start_anim_by_struct(&meta_boop, 0, 0);
         if (!heart_state) {
             heart_is_boop = 1;
             heart_color = heart_color_options[badge_conf.badge_id % HEART_COLOR_COUNT];
@@ -179,7 +179,7 @@ void eye_cb(tSensor* pSensor)
         badge_conf.current_band_id = (badge_conf.current_band_id + 1) % band_unlocked_count();
         SYSCFG0 = FRWPPW | DFWP_1 | PFWP_1;
 
-        band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
+        band_start_anim_by_id(badge_conf.current_band_id, 0, 1);
     }
 }
 
@@ -251,7 +251,7 @@ int main(void) {
         set_badge_seen(badge_conf.badge_id);
     }
 
-    band_start_anim_by_id(badge_conf.current_band_id, 0, 0, 1);
+    band_start_anim_by_id(badge_conf.current_band_id, 0, 1);
 
     WDTCTL = WDTPW | WDTSSEL__ACLK | WDTIS__32K | WDTCNTCL; // 1 second WDT
 
@@ -340,11 +340,11 @@ int main(void) {
             if (badge_seen(paired_id)) {
                 // do the already-seen thing
                 current_ambient_correct = 2;
-                band_start_anim_by_struct(&meta_pair_band, 10, 0);
+                band_start_anim_by_struct(&meta_pair, 10, 0);
             } else {
                 // do the NEW thing
                 current_ambient_correct = 7;
-                band_start_anim_by_struct(&meta_newpair_band, 20, 0);
+                band_start_anim_by_struct(&meta_newpair, 20, 0);
                 set_badge_seen(paired_id);
             }
             heart_color = heart_color_options[(badge_conf.badge_id+paired_id) % HEART_COLOR_COUNT];
@@ -385,7 +385,8 @@ __interrupt void TIMER0_A0_ISR_HOOK(void)
 
 // Dedicated ISR for CCR0. Vector is cleared on service.
 #pragma vector=TIMER1_A0_VECTOR
-__attribute__((ramfunc)) __interrupt void TIMER1_A0_ISR_HOOK(void)
+//__attribute__((ramfunc))
+__interrupt void TIMER1_A0_ISR_HOOK(void)
 {
     P1OUT ^= BIT3;
 }

@@ -125,7 +125,7 @@ def main():
             h_lines.append("extern const rgbcolor_t %s_band_frames[][4];" % anim_name)
             
             # Flags are all the same.
-            local_animation_names += ["%s_band" % anim_name]
+            local_animation_names += [anim_name]
             
             metadata1 = []
             metadata2 = []
@@ -155,13 +155,9 @@ def main():
             h_lines.append("extern const uint16_t %s_band_fade_durs[];" % anim_name)
             
             c_lines.append("// the animation:")
-            c_lines.append("const band_animation_t %s_band = {%s_band_frames, %s_band_durations, %s_band_fade_durs, %d, ANIM_TYPE_%s, %d};" % (anim_name, anim_name, anim_name, anim_name, len(camo_frames), local_type.upper(), boop_loops))
+            c_lines.append("const band_animation_t %s = {%s_band_frames, %s_band_durations, %s_band_fade_durs, %d, ANIM_TYPE_%s, %d};" % (anim_name, anim_name, anim_name, anim_name, len(camo_frames), local_type.upper(), boop_loops))
             
-            h_lines.append("extern const band_animation_t %s_band;" % anim_name)
-
-            c_lines.append("")
-            h_lines.append("extern const band_animation_t *%s_anim_set[1];" % anim_name)
-            c_lines.append("const band_animation_t *%s_anim_set[1] = {%s};" % (anim_name, ', '.join(map(lambda a: "&%s" % a, local_animation_names))))
+            h_lines.append("extern const band_animation_t %s;" % anim_name)
 
     c_lines.append("")
     h_lines.append("#define HEAD_ANIM_COUNT %d" % len(all_animations))
@@ -171,8 +167,10 @@ def main():
     for i in range(len(all_types)):
         h_lines.append("#define ANIM_TYPE_%s %d" % (all_types[i].upper(), i))
     h_lines.append("#define LEG_ANIM_TYPE_COUNT %d" % len(all_types))
-    c_lines.append("const band_animation_t **legs_all_anim_sets[] = {%s};" % ', '.join(map(lambda a: "%s_anim_set" % a, all_animations+meta_animations)))
-    h_lines.append("extern const band_animation_t **legs_all_anim_sets[];")
+
+
+    c_lines.append("const band_animation_t *band_all_anims[%d] = {%s};" % (len(all_animations+meta_animations), ', '.join(map(lambda a: '&%s' % a, all_animations+meta_animations))))
+    h_lines.append("extern const band_animation_t *band_all_anims[%d];" % len(all_animations+meta_animations))
     
     h_lines.append("#endif // _H_")
      

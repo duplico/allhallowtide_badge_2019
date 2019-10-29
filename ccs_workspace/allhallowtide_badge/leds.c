@@ -75,9 +75,7 @@ uint8_t heart_is_boop;
 
 uint8_t band_anim_frame;
 uint8_t band_anim_id;
-uint8_t band_anim_type;
 uint8_t band_saved_anim_id;
-uint8_t band_saved_anim_type;
 uint8_t band_is_ambient = 1;
 uint8_t band_anim_looping;
 uint8_t band_anim_length;
@@ -193,7 +191,6 @@ void band_start_anim_by_struct(const band_animation_t *animation, uint8_t loop, 
     //  was so we can go back to it.
     if (!ambient && band_is_ambient) {
         band_saved_anim_id = band_anim_id;
-        band_saved_anim_type = band_anim_type;
     }
 
     band_is_ambient = ambient;
@@ -213,20 +210,18 @@ void band_start_anim_by_struct(const band_animation_t *animation, uint8_t loop, 
     band_dirty = 1;
 }
 
-void band_start_anim_by_id(uint8_t anim_id, uint8_t anim_type, uint8_t loop, uint8_t ambient) {
+void band_start_anim_by_id(uint8_t anim_id, uint8_t loop, uint8_t ambient) {
     if (ambient && !band_is_ambient) {
         // If we've been asked to switch our ambient animation, but we're currently in an
         //  interrupting animation, we need to change what we have saved so we go back to
         //  the new ambient animation.
         band_saved_anim_id = anim_id;
-        band_saved_anim_type = anim_type;
         return;
     }
 
-    band_start_anim_by_struct(legs_all_anim_sets[anim_id][anim_type], loop, ambient);
+    band_start_anim_by_struct(band_all_anims[anim_id], loop, ambient);
 
     band_anim_id = anim_id;
-    band_anim_type = anim_type;
 }
 
 /// Load and display the next animation frame in the current animation.
@@ -242,7 +237,7 @@ void band_next_anim_frame() {
         } else { // not ambient, no loops remaining
             band_is_ambient = 1; // Now we're back to being ambient...
             current_ambient_correct = 1;
-            band_start_anim_by_id(band_saved_anim_id, band_saved_anim_type, 0, 1);
+            band_start_anim_by_id(band_saved_anim_id, 0, 1);
             return; // skip the transitions_and_go because that's called in start_anim.
         }
     }
